@@ -1,23 +1,121 @@
-PCSX4ALL-LilSmoke is a mixed-license work, not an MPL-only project.
+PCSX4ALL-LilSmoke
+=================
 
-The PCSX emulator as a combined program is distributed under
-GNU GPL version 3 or later, with all original per-file notices retained.
-See LICENSES/GPL-3.0.txt and pcsx4all/gpl.txt. GPL-2.0-or-later upstream notices
-are not replaced. MIT and dual GPL/LGPL notices continue to govern those files.
+PCSX4ALL-LilSmoke is a mixed-license software project. This file summarizes
+the licensing of the combined emulator, project-authored files, and third-party
+components. It does not replace, narrow, or override any license or copyright
+notice contained in an individual source file or third-party package.
 
-Copyright (c) 2026 Jose Pilas and contributors, for eligible original material.
-The standalone owner-authored files pcsx4all/pcsx4all-launch.cpp,
-pcsx4all/native-menu.cpp, pcsx4all/native-menu.h, pcsx4all/state-io.h,
-pcsx4all/state-store.h, app/PCSX4ALL.sh, app/meta.json, app/pcsx4all.cfg,
-tools/*.py, tests/*.cpp, eligible support/*.cpp and support/*.h (except the
-MIT-licensed gamepad-state.h), and original release documentation are MPL-2.0.
-See LICENSES/MPL-2.0.txt. This designation does not cover imported routines,
-third-party files or patches to GPL files. The independently rewritten
-src/port/rkgame/port.cpp integration retains GPL-2.0-or-later compatibility.
+1. Combined emulator and application
+------------------------------------
 
-An MPL-2.0 designation on eligible original files does not alter GPL obligations
-for the combined executable. MPL section 3.3 applies where its conditions are
-met; no Incompatible With Secondary Licenses notice is added.
+The combined PCSX4ALL-LilSmoke emulator is distributed under the GNU General
+Public License, version 3 or (at your option) any later version
+(GPL-3.0-or-later), subject to the terms and notices applicable to the included
+components.
 
-Existing upstream notices, copyright statements, and library licenses prevail.
-Review RELEASE_GATE.json and BUILD-EVIDENCE.json before redistribution.
+The emulator includes code from PCSX, PCSX-df, PCSX-Reloaded, PCSX4ALL,
+PCSX-ReARMed, the Unai GPU, gpulib, and other contributors. Their copyright
+notices and per-file license terms remain in force. In particular, upstream
+files marked GPL-2.0-or-later remain subject to those notices; this project
+does not claim to have rewritten or relicensed third-party code merely by
+including it in a combined application.
+
+The full GPLv3 text is included at LICENSES/GPL-3.0.txt and the upstream PCSX
+license text is retained at pcsx4all/gpl.txt. Other applicable license texts
+are provided in LICENSES/ and alongside the relevant upstream source.
+
+2. Project-authored files under MPL-2.0
+---------------------------------------
+
+The following project-authored files and original materials are licensed under
+the Mozilla Public License, version 2.0 (MPL-2.0), where identified by their
+file headers or by this section:
+
+- pcsx4all/pcsx4all-launch.cpp
+- pcsx4all/native-menu.cpp and pcsx4all/native-menu.h
+- pcsx4all/state-io.h and pcsx4all/state-store.h
+- app/PCSX4ALL.sh, app/meta.json, and app/pcsx4all.cfg
+- tools/*.py
+- tests/*.cpp
+- eligible original files in support/ (including the Input, Keymap, Log,
+  input-wire, and EmulatorHelper files), except where a file carries another
+  license, such as the MIT-licensed support/gamepad-state.h
+- original project documentation, including release and build documentation
+
+The MPL-2.0 text is included at LICENSES/MPL-2.0.txt. The MPL is a file-level
+copyleft license: when distributing a covered source file, retain its MPL
+notices and comply with the MPL's requirements for that file.
+
+Where the conditions of MPL-2.0 Section 3.3 are satisfied, eligible MPL-covered
+files are also made available under the applicable Secondary License as part
+of this larger work, including GPL-3.0-or-later. This permits recipients to
+redistribute those covered files under either license in accordance with the
+MPL's terms. This Section 3.3 permission applies only to eligible MPL-covered
+material; it does not relicense this repository as a whole under MPL-2.0, and
+it does not change the licenses of third-party code.
+
+No “Incompatible With Secondary Licenses” notice is intentionally applied to
+the eligible project-authored MPL-2.0 files listed above. Any such notice
+present in a file, if one is added in the future, must be respected.
+
+3. Files that remain under other licenses
+-----------------------------------------
+
+Project-authored additions are not all MPL-2.0. For example,
+pcsx4all/src/port/rkgame/port.cpp is identified as GPL-2.0-or-later and remains
+under that license. Changes made within upstream GPL files, imported routines,
+patches to GPL files, and third-party source files are not reclassified as
+MPL-2.0 by this summary.
+
+Some files or components carry MIT, LGPL, FTL, zlib, libpng, or other license
+terms. Their original notices, attribution requirements, and applicable
+conditions continue to apply. The presence of an MPL-2.0 notice on a separate
+project-authored file does not change the terms of those components.
+
+See the following files for the component inventory and licensing details:
+
+- THIRD_PARTY_NOTICES.md
+- SOURCE-ORIGINS.json
+- SUPPORT-ORIGINS.json
+- LICENSES/
+- pcsx4all/gpl.txt
+
+The bundled dependency versions and their licenses are recorded in
+THIRD_PARTY_NOTICES.md and the corresponding source/build materials.
+
+4. Source code, builds, and redistribution
+------------------------------------------
+
+The public release provides the corresponding emulator/support sources,
+dependency source archives, patches, notices, and build tools separately from
+the installable .lilpck package. The release's SOURCE-OFFER.txt points to the
+corresponding-source archive. Recipients redistributing the executable or
+source must satisfy every applicable license, including source availability,
+license-copy, attribution, and notice requirements.
+
+The public build scripts and BUILD-EVIDENCE.json document the intended build
+process and the recorded release artifact. They are useful for verification,
+but do not replace the requirements of any applicable license.
+
+The package does not include PlayStation game ROMs, commercial game data, a
+Sony BIOS, stock vendor firmware, or a LilSmokeOS system image. Users are
+responsible for obtaining and using any game data or firmware lawfully.
+
+5. Copyright and warranty
+-------------------------
+
+Copyright in original project-authored contributions belongs to their
+respective authors as indicated in file headers and related notices.
+Copyrights in PCSX and other third-party components remain with their
+respective rights holders.
+
+The software is provided under the terms of the applicable licenses and
+without warranty, to the extent permitted by those licenses and applicable law.
+Refer to each included license for its complete terms, conditions, disclaimers,
+and limitations of liability.
+
+This file is a project licensing summary, not a substitute for the complete
+license texts or legal advice. When a question arises about a specific file,
+the notices in that file and the applicable upstream license take precedence
+over this summary.
