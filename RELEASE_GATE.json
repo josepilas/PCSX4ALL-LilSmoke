@@ -1,0 +1,8 @@
+{
+  "publication_ready": true,
+  "self_contained_corresponding_source": true,
+  "blockers": [],
+  "runtime_binary_sha256": "eb121e5ead36387128fc2b41ed821907c5cafc9d02c90f4a86ac26d8d85319e6",
+  "evidence": "BUILD-EVIDENCE.json",
+  "source_boundary": "PCSX emulator plus narrow support only; no unrelated private OS source"
+}

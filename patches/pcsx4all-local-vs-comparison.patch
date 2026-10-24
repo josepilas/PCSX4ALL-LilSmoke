@@ -1,0 +1,1667 @@
+--- /dev/null
++++ b/Makefile.rkgame
+@@ -0,0 +1,306 @@
++TARGET = libpcsx4all_rkgame.a
++PORT   = rkgame
++
++# If V=1 was passed to 'make', don't hide commands:
++ifeq ($(V),1)
++	HIDECMD:=
++else
++	HIDECMD:=@
++endif
++
++# Using 'gpulib' adapted from PCSX Rearmed is default, specify
++#  USE_GPULIB=0 as param to 'make' when building to disable it.
++USE_GPULIB ?= 1
++
++#GPU   = gpu_dfxvideo
++#GPU   = gpu_drhell
++#GPU   = gpu_null
++GPU   = gpu_unai
++
++SPU   = spu_pcsxrearmed
++
++RECOMPILER = mips
++
++RM     = rm -f
++MD     = mkdir -p
++CROSS_COMPILE ?= mipsel-linux-
++ZIG ?= zig
++ZIG_MIPS ?= 0
++NO_SDL ?= 0
++ifeq ($(ZIG_MIPS),1)
++NO_SDL = 1
++CC     = $(ZIG) cc -target mipsel-linux-musl
++CXX    = $(ZIG) c++ -target mipsel-linux-musl
++LD     = $(ZIG) c++ -target mipsel-linux-musl
++AR     = $(ZIG) ar
++ZIG_EXE_PATH := $(shell $(ZIG) env | sed -n 's/^    \.zig_exe = "\(.*\)",/\1/p' | sed 's#\\#/#g')
++ZIG_LIB ?= $(patsubst %/,%,$(dir $(ZIG_EXE_PATH)))/lib
++ZIG_SYSROOT_CFLAGS = \
++	-isystem $(ZIG_LIB)/libc/include/mips-linux-musl \
++	-isystem $(ZIG_LIB)/libc/include/generic-musl \
++	-isystem $(ZIG_LIB)/libc/include/any-linux-any \
++	-isystem $(ZIG_LIB)/libc/musl/arch/mips \
++	-isystem $(ZIG_LIB)/libc/musl/include \
++	-isystem $(ZIG_LIB)/include
++TOOLCHAIN_CFLAGS = -Isrc/port/$(PORT)/compat $(ZIG_SYSROOT_CFLAGS)
++ZIG_CXXFLAGS = -nostdinc++
++else
++CC     = $(CROSS_COMPILE)gcc
++CXX    = $(CROSS_COMPILE)g++
++LD     = $(CROSS_COMPILE)g++
++AR     = $(CROSS_COMPILE)ar
++TOOLCHAIN_CFLAGS = -mplt -mno-shared
++ZIG_CXXFLAGS =
++endif
++
++ifeq ($(NO_SDL),1)
++SDL_CFLAGS  :=
++SDL_LIBS    :=
++else
++SYSROOT     := $(shell $(CC) --print-sysroot)
++SDL_CONFIG  := $(SYSROOT)/usr/bin/sdl-config
++SDL_CFLAGS  := $(shell $(SDL_CONFIG) --cflags)
++SDL_LIBS    := $(shell $(SDL_CONFIG) --libs)
++endif
++
++LDFLAGS := $(SDL_LIBS) -lSDL_mixer -lSDL_image -lpthread -lrt -lz
++
++ifdef A320
++	C_ARCH = -mips32 -msoft-float -DGCW_ZERO -DDYNAREC_SKIP_DCACHE_FLUSH -DTMPFS_MIRRORING -DTMPFS_DIR=\"/tmp\"
++else
++	C_ARCH = -mips32r2 -DGCW_ZERO -DSHMEM_MIRRORING
++endif
++
++ifeq ($(DEV),1)
++	# If DEV=1 is passed to 'make', don't mmap anything to virtual address 0.
++	#  This is for development/debugging: it allows null pointer dereferences
++	#  to segfault as they normally would. We'll map PS1 address space higher.
++	#
++	# Furthermore, div-by-zero is also checked for at runtime (default for GCC)
++else
++	# Default: Allows address-conversion optimization in dynarec. PS1 addresses
++	#          will be mapped/mirrored at virtual address 0.
++	#
++	# Null pointer dereferences will NOT segfault.
++	# Locate program at virtual address 0x4000_0000. Anything below is free for
++	#  fixed mappings by dynarec, etc. Otherwise, the Linux default seems to be
++	#  0x40_0000 i.e., offset 4MB from 0. That's not enough room to map and
++	#  mirror PS1 address space.
++	C_ARCH  += -DMMAP_TO_ADDRESS_ZERO
++	LDFLAGS += -Wl,-Ttext-segment=0x40000000
++
++	# Furthermore, div-by-zero checks are disabled (helps software rendering)
++	C_ARCH  += -mno-check-zero-division
++endif
++
++ifeq ($(NO_SDL),1)
++RKGAME_USE_SDL_JOYSTICK ?= 0
++else
++RKGAME_USE_SDL_JOYSTICK ?= 1
++endif
++
++CFLAGS := $(C_ARCH) $(TOOLCHAIN_CFLAGS) -ggdb3 -O2 \
++	-Wall -Wunused -Wpointer-arith \
++	-Wno-sign-compare -Wno-cast-align \
++	-Isrc -Isrc/spu/$(SPU) -D$(SPU) -Isrc/gpu/$(GPU) \
++	-Isrc/port/$(PORT) \
++	-Isrc/plugin_lib \
++	-DRKGAME_FIRMWARE \
++	-DRKGAME_DEFAULT_WORK_PATH=\"/mnt/sdcard/cubegm/\" \
++	-DRKGAME_PCSX_BUILD_DATE=\"Feb\ 14\ 2024\" \
++	-DXA_HACK \
++	-DINLINE="static __inline__" -Dasm="__asm__ __volatile__" \
++	$(SDL_CFLAGS)
++
++ifeq ($(RKGAME_USE_SDL_JOYSTICK),1)
++CFLAGS += -DRKGAME_USE_SDL_JOYSTICK
++endif
++
++# Convert plugin names to uppercase and make them CFLAG defines
++CFLAGS += -D$(shell echo $(GPU) | tr a-z A-Z)
++CFLAGS += -D$(shell echo $(SPU) | tr a-z A-Z)
++
++ifdef RECOMPILER
++CFLAGS += -DPSXREC -D$(RECOMPILER)
++endif
++
++OBJDIRS = obj obj/gpu obj/gpu/$(GPU) obj/spu obj/spu/$(SPU) \
++	  obj/recompiler obj/recompiler/$(RECOMPILER) \
++	  obj/port obj/port/$(PORT) \
++	  obj/plugin_lib
++
++all: maketree $(TARGET)
++
++OBJS = \
++	obj/r3000a.o obj/misc.o obj/plugins.o obj/psxmem.o obj/psxhw.o \
++	obj/psxcounters.o obj/psxdma.o obj/psxbios.o obj/psxhle.o obj/psxevents.o \
++	obj/psxcommon.o \
++	obj/plugin_lib/plugin_lib.o obj/plugin_lib/pl_sshot.o \
++	obj/psxinterpreter.o \
++	obj/mdec.o obj/decode_xa.o \
++	obj/cdriso.o obj/cdrom.o obj/ppf.o \
++	obj/sio.o obj/pad.o
++
++ifdef RECOMPILER
++OBJS += \
++	obj/recompiler/mips/recompiler.o \
++	obj/recompiler/mips/host_asm.o \
++	obj/recompiler/mips/mem_mapping.o \
++	obj/recompiler/mips/mips_codegen.o \
++	obj/recompiler/mips/mips_disasm.o
++endif
++
++######################################################################
++#  GPULIB from PCSX Rearmed:
++#  Fixes many game incompatibilities and centralizes/improves many
++#  things that once were the responsibility of individual GPU plugins.
++#  NOTE: For now, only GPU Unai has been adapted.
++ifeq ($(USE_GPULIB),1)
++CFLAGS += -DUSE_GPULIB
++OBJDIRS += obj/gpu/gpulib
++OBJS += obj/gpu/$(GPU)/gpulib_if.o
++OBJS += obj/gpu/gpulib/gpu.o obj/gpu/gpulib/vout_port.o
++else
++OBJS += obj/gpu/$(GPU)/gpu.o
++endif
++######################################################################
++
++OBJS += obj/gte.o
++OBJS += obj/spu/$(SPU)/spu.o
++
++OBJS += obj/port/$(PORT)/port.o
++
++OBJS += obj/plugin_lib/perfmon.o
++
++#******************************************
++# spu_pcsxrearmed section BEGIN
++#******************************************
++
++##########
++# Use a non-default SPU update frequency for these slower devices
++#  to avoid audio dropouts. 0: once-per-frame (default)   5: 32-times-per-frame
++#
++#  On slower Dingoo A320, update 8 times per frame
++ifdef A320
++CFLAGS += -DSPU_UPDATE_FREQ_DEFAULT=3
++else
++#  On faster GCW Zero platform, update 4 times per frame
++CFLAGS += -DSPU_UPDATE_FREQ_DEFAULT=2
++endif
++##########
++
++##########
++# Similarly, set higher XA audio update frequency for slower devices
++#
++#  On slower Dingoo A320, force XA to update 8 times per frame (val 4)
++ifdef A320
++CFLAGS += -DFORCED_XA_UPDATES_DEFAULT=4
++else
++#  On faster GCW Zero platform, use auto-update
++CFLAGS += -DFORCED_XA_UPDATES_DEFAULT=1
++endif
++##########
++
++ifeq ($(SPU),spu_pcsxrearmed)
++# Specify which audio backend to use:
++ifeq ($(NO_SDL),1)
++SOUND_DRIVERS=
++else
++SOUND_DRIVERS=sdl
++endif
++#SOUND_DRIVERS=alsa
++#SOUND_DRIVERS=oss
++#SOUND_DRIVERS=pulseaudio
++
++# Note: obj/spu/spu_pcsxrearmed/spu.o will already have been added to OBJS
++#		list previously in Makefile
++OBJS += obj/spu/spu_pcsxrearmed/dma.o obj/spu/spu_pcsxrearmed/freeze.o \
++	obj/spu/spu_pcsxrearmed/out.o obj/spu/spu_pcsxrearmed/nullsnd.o \
++	obj/spu/spu_pcsxrearmed/registers.o
++ifeq "$(ARCH)" "arm"
++OBJS += obj/spu/spu_pcsxrearmed/arm_utils.o
++endif
++ifeq "$(HAVE_C64_TOOLS)" "1"
++obj/spu/spu_pcsxrearmed/spu.o: CFLAGS += -DC64X_DSP
++obj/spu/spu_pcsxrearmed/spu.o: obj/spu/spu_pcsxrearmed/spu_c64x.c
++frontend/menu.o: CFLAGS += -DC64X_DSP
++endif
++ifneq ($(findstring oss,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_OSS
++OBJS += obj/spu/spu_pcsxrearmed/oss.o
++endif
++ifneq ($(findstring alsa,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_ALSA
++OBJS += obj/spu/spu_pcsxrearmed/alsa.o
++LDFLAGS += -lasound
++endif
++ifneq ($(filter sdl,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_SDL
++OBJS += obj/spu/spu_pcsxrearmed/sdl.o
++endif
++ifneq ($(filter sdl2,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_SDL2
++OBJS += obj/spu/spu_pcsxrearmed/sdl2.o
++endif
++ifneq ($(findstring pulseaudio,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_PULSE
++OBJS += obj/spu/spu_pcsxrearmed/pulseaudio.o
++endif
++ifneq ($(findstring libretro,$(SOUND_DRIVERS)),)
++obj/spu/spu_pcsxrearmed/out.o: CFLAGS += -DHAVE_LIBRETRO
++endif
++
++endif
++#******************************************
++# spu_pcsxrearmed END
++#******************************************
++
++CXXFLAGS := $(CFLAGS) $(ZIG_CXXFLAGS) -fno-rtti -fno-exceptions
++CFLAGS += $(EXTRA_CFLAGS)
++CXXFLAGS += $(EXTRA_CFLAGS)
++
++$(TARGET): $(OBJS)
++	@echo Archiving $(TARGET)...
++	$(HIDECMD)$(AR) rcs $@ $(OBJS)
++	@echo
++ifeq ($(DEV),1)
++	@echo "-> WARNING: This is a development build.                                  "
++	@echo "            Mapping to virtual address zero is disabled. As a result,     "
++	@echo "            some address-related dynarec optimizations are disabled.      "
++	@echo "            Furthermore, div-by-zero checks are enabled in C/C++ code.    "
++else
++	@echo "-> This is a release build.                                               "
++	@echo "    * Null pointer dereferences will NOT segfault (mmap to 0 is allowed). "
++	@echo "    * Div-by-zero in C/C++ code will NOT trap & abort execution.          "
++	@echo "   If developing/debugging, you can pass DEV=1 on make command-line to    "
++	@echo "   disable these behaviors. Be sure to do a clean rebuild.                "
++endif
++
++obj/%.o: src/%.c
++	@echo Compiling $<...
++	$(HIDECMD)$(CC) $(CFLAGS) -c $< -o $@
++
++obj/%.o: src/%.cpp
++	@echo Compiling $<...
++	$(HIDECMD)$(CXX) $(CXXFLAGS) -c $< -o $@
++
++obj/%.o: src/%.s
++	@echo Compiling $<...
++	$(HIDECMD)$(CXX) $(CFLAGS) -c $< -o $@
++
++obj/%.o: src/%.S
++	@echo Compiling $<...
++	$(HIDECMD)$(CXX) $(CFLAGS) -c $< -o $@
++
++$(sort $(OBJDIRS)):
++	$(HIDECMD)$(MD) $@
++
++maketree: $(sort $(OBJDIRS))
++
++clean:
++	$(RM) -r obj
++	$(RM) $(TARGET)
++
++shared: $(OBJS)
++	@echo Linking libemu_pcsx.so...
++	$(HIDECMD)$(LD) -shared $(OBJS) $(LDFLAGS) -o libemu_pcsx.so
+--- /dev/null
++++ b/native-menu.cpp
+@@ -0,0 +1,191 @@
++// Copyright (c) 2026 Jose Pilas and contributors.
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++// SPDX-License-Identifier: MPL-2.0
++#include "native-menu.h"
++#include "Input.h"
++#include "EmulatorHelper.h"
++#include <algorithm>
++#include <SDL2/SDL.h>
++#include <SDL2/SDL_ttf.h>
++#include <filesystem>
++#include <cerrno>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <exception>
++#include <fcntl.h>
++#include <sys/prctl.h>
++#include <sys/wait.h>
++#include <unistd.h>
++
++namespace fs = std::filesystem;
++namespace {
++constexpr size_t selectionLimit = 4096;
++std::string runNativeMenu() {
++    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) || TTF_Init()) {
++        std::fprintf(stderr, "PCSX native menu initialization: %s\n", SDL_GetError());
++        _exit(10);
++    }
++    int width = 640, height = 480;
++    SDL_DisplayMode display{};
++    if (SDL_GetCurrentDisplayMode(0, &display) == 0) { width = display.w; height = display.h; }
++    if (const char *w = std::getenv("LILSMOKE_SCREEN_WIDTH")) width = std::atoi(w);
++    if (const char *h = std::getenv("LILSMOKE_SCREEN_HEIGHT")) height = std::atoi(h);
++    const char *native = std::getenv("LILSMOKE_M8_NATIVE_VIDEO");
++    if (native && !std::strcmp(native, "1")) { width = 426; height = 240; }
++    width = std::clamp(width, 320, 1920); height = std::clamp(height, 240, 1080);
++    SDL_Window *window = SDL_CreateWindow("PCSX4ALL", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
++                                          width, height, SDL_WINDOW_FULLSCREEN);
++    SDL_Renderer *renderer = window ? SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE) : nullptr;
++    TTF_Font *font = TTF_OpenFont("/usr/share/fonts/dejavu/DejaVuSans.ttf", height < 400 ? 16 : 22);
++    if (!renderer || !font) {
++        std::fprintf(stderr, "PCSX native menu: %s\n", SDL_GetError());
++        if (font) TTF_CloseFont(font);
++        if (renderer) SDL_DestroyRenderer(renderer);
++        if (window) SDL_DestroyWindow(window);
++        TTF_Quit(); _exit(10);
++    }
++    lilsmoke::Input input;
++    SDL_ShowCursor(SDL_DISABLE);
++    input.init(width, height);
++    fs::path directory = "/storage/roms/psx";
++    std::vector<fs::path> entries;
++    std::vector<std::string> labels{"Load game", "Quit"};
++    int selected = 0;
++    bool browser = false, active = true;
++    std::string chosen, error;
++    const auto refresh = [&]() {
++        labels = {".."}; entries.clear(); entries.push_back(directory.parent_path()); selected = 0;
++        std::error_code ec;
++        std::vector<fs::path> paths;
++        for (fs::directory_iterator it(directory, ec), end; !ec && it != end && paths.size() < 4096; it.increment(ec)) {
++            if (it->is_symlink(ec) || it->path().filename().string().front() == '.') continue;
++            auto extension = it->path().extension().string();
++            for (char &c : extension) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
++            if (it->is_directory(ec) || extension == ".cue" || extension == ".bin" || extension == ".img" ||
++                extension == ".iso" || extension == ".pbp" || extension == ".zip" || extension == ".7z" ||
++                extension == ".rar" || extension == ".tar" || extension == ".gz" || extension == ".bz2" ||
++                extension == ".xz" || extension == ".tgz" || extension == ".txz" || extension == ".tbz2") paths.push_back(it->path());
++        }
++        std::sort(paths.begin(), paths.end());
++        for (const auto &path : paths) { entries.push_back(path); labels.push_back(path.filename().string()); }
++    };
++    const auto text = [&](const std::string &value, int x, int y, SDL_Color color) {
++        SDL_Surface *surface = TTF_RenderUTF8_Blended(font, value.c_str(), color);
++        if (!surface) return;
++        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
++        SDL_Rect dst{x, y, surface->w, surface->h}; SDL_FreeSurface(surface);
++        SDL_Rect clip{12, y, width - 24, 32}; SDL_RenderSetClipRect(renderer, &clip);
++        if (texture) { SDL_RenderCopy(renderer, texture, nullptr, &dst); SDL_DestroyTexture(texture); }
++        SDL_RenderSetClipRect(renderer, nullptr);
++    };
++    std::fprintf(stderr, "PCSX_OWN_MENU_ENTER\n");
++    while (active) {
++        SDL_Event event;
++        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) active = false;
++        lilsmoke::InputButton button; lilsmoke::InputEvent action; lilsmoke::PointerEvent pointer;
++        while (input.poll(button, action, pointer)) {
++            if (action != lilsmoke::InputEvent::Pressed && action != lilsmoke::InputEvent::Repeat) continue;
++            if (button == lilsmoke::InputButton::Up) selected = std::max(0, selected - 1);
++            if (button == lilsmoke::InputButton::Down) selected = std::min(static_cast<int>(labels.size()) - 1, selected + 1);
++            if (button == lilsmoke::InputButton::Home || button == lilsmoke::InputButton::Power) active = false;
++            if (button == lilsmoke::InputButton::B && action == lilsmoke::InputEvent::Pressed) {
++                if (browser) { browser = false; labels = {"Load game", "Quit"}; selected = 0; }
++                else active = false;
++            }
++            if ((button != lilsmoke::InputButton::A && button != lilsmoke::InputButton::Start) || action != lilsmoke::InputEvent::Pressed) continue;
++            if (!browser) {
++                if (selected == 1) active = false;
++                else { browser = true; refresh(); }
++            } else {
++                std::error_code ec;
++                const auto path = entries[selected];
++                if (fs::is_directory(path, ec)) { directory = path; refresh(); }
++                else {
++                    const char *resolver = std::getenv("LILSMOKE_ROM_RESOLVER");
++                    chosen = lilsmoke::readEmulatorHelper(resolver ? resolver : "/usr/lib/lilsmoke/lilsmoke-rom",
++                                                          {"psx", path.string()}, 4096, 300, false);
++                    if (!chosen.empty() && chosen.back() == '\n') chosen.pop_back();
++                    if (chosen.empty()) error = "Could not load game data";
++                    else { chosen = path.string(); active = false; }
++                }
++            }
++        }
++        SDL_SetRenderDrawColor(renderer, 24, 28, 32, 255); SDL_RenderClear(renderer);
++        text("PCSX4ALL", 16, 12, {255, 255, 255, 255});
++        const int rows = std::max(1, (height - 100) / 36), first = std::max(0, selected - rows + 1);
++        for (int i = first; i < std::min(static_cast<int>(labels.size()), first + rows); ++i) {
++            const int y = 58 + (i - first) * 36;
++            if (i == selected) { SDL_SetRenderDrawColor(renderer, 47, 103, 74, 255); SDL_Rect row{12, y, width - 24, 34}; SDL_RenderFillRect(renderer, &row); }
++            text(labels[i], 20, y + 4, {235, 239, 237, 255});
++        }
++        if (!error.empty()) text(error, 16, height - 34, {255, 170, 150, 255});
++        SDL_RenderPresent(renderer); SDL_Delay(16);
++    }
++    TTF_CloseFont(font); SDL_DestroyRenderer(renderer); SDL_DestroyWindow(window); TTF_Quit();
++    return chosen;
++}
++}  // namespace
++
++std::string pcsxNativeMenu() {
++    int resultPipe[2];
++    if (pipe2(resultPipe, O_CLOEXEC)) {
++        std::perror("PCSX native menu result pipe"); std::exit(10);
++    }
++    std::fflush(nullptr);
++    const pid_t parent = getpid(), worker = fork();
++    if (worker < 0) {
++        std::perror("PCSX native menu fork");
++        close(resultPipe[0]); close(resultPipe[1]); std::exit(10);
++    }
++    if (!worker) {
++        close(resultPipe[0]);
++        if (prctl(PR_SET_PDEATHSIG, SIGTERM) || getppid() != parent) _exit(10);
++        try {
++            const auto chosen = runNativeMenu();
++            if (chosen.size() > selectionLimit) _exit(10);
++            size_t sent = 0;
++            while (sent < chosen.size()) {
++                const ssize_t count = write(resultPipe[1], chosen.data() + sent, chosen.size() - sent);
++                if (count < 0 && errno == EINTR) continue;
++                if (count <= 0) _exit(10);
++                sent += static_cast<size_t>(count);
++            }
++            close(resultPipe[1]);
++            std::fprintf(stderr, "PCSX_OWN_MENU_WORKER_STOP selected=%d\n", !chosen.empty());
++            std::fflush(nullptr);
++            // DirectFB's Fusion thread crashes in musl during SDL_Quit. Keep
++            // SDL in this worker; process exit releases its remaining context.
++            _exit(0);
++        } catch (const std::exception &error) {
++            std::fprintf(stderr, "PCSX native menu worker: %s\n", error.what());
++            _exit(10);
++        }
++    }
++    close(resultPipe[1]);
++    std::string chosen;
++    char buffer[512];
++    bool valid = true;
++    for (;;) {
++        const ssize_t count = read(resultPipe[0], buffer, sizeof buffer);
++        if (count < 0 && errno == EINTR) continue;
++        if (!count) break;
++        if (count < 0) { valid = false; break; }
++        if (chosen.size() + static_cast<size_t>(count) > selectionLimit) valid = false;
++        if (valid) chosen.append(buffer, static_cast<size_t>(count));
++    }
++    close(resultPipe[0]);
++    int status = 0;
++    pid_t waited;
++    do { waited = waitpid(worker, &status, 0); } while (waited < 0 && errno == EINTR);
++    if (waited != worker || !WIFEXITED(status) || WEXITSTATUS(status) || !valid ||
++        chosen.find('\0') != std::string::npos) {
++        std::fprintf(stderr, "PCSX_OWN_MENU_WORKER_ERROR status=%d signal=%d result_valid=%d\n",
++                     status, waited == worker && WIFSIGNALED(status) ? WTERMSIG(status) : 0, valid);
++        std::exit(waited == worker && WIFSIGNALED(status) ? 128 + WTERMSIG(status) : 10);
++    }
++    std::fprintf(stderr, "PCSX_OWN_MENU_EXIT selected=%d worker_exit=0\n", !chosen.empty());
++    return chosen;
++}
+--- /dev/null
++++ b/native-menu.h
+@@ -0,0 +1,8 @@
++// Copyright (c) 2026 Jose Pilas and contributors.
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++// SPDX-License-Identifier: MPL-2.0
++#pragma once
++#include <string>
++std::string pcsxNativeMenu();
+--- /dev/null
++++ b/pcsx4all-launch.cpp
+@@ -0,0 +1,323 @@
++// Copyright (c) 2026 Jose Pilas and contributors.
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++// SPDX-License-Identifier: MPL-2.0
++// Native software frontend for the reconstructed PCSX4ALL core.
++#include "rkgame_bridge.h"
++#include "Input.h"
++#include "native-menu.h"
++#include "state-store.h"
++#include <SDL2/SDL.h>
++#include <SDL2/SDL_ttf.h>
++#include <csignal>
++#include <algorithm>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <filesystem>
++#include <unistd.h>
++
++namespace {
++SDL_Window *window = nullptr;
++SDL_Renderer *renderer = nullptr;
++SDL_Texture *texture = nullptr;
++SDL_Surface *output = nullptr, *source = nullptr, *converted = nullptr;
++SDL_Rect destination{};
++bool surfaceVideo = false;
++bool nativeVideo = false, paused = false, menuChord = false;
++int menuChoice = 0;
++int stateSlot = 0, stateAction = 0;
++PcsxStateStore stateStore;
++std::string stateMessage;
++TTF_Font *menuFont = nullptr;
++extern "C" void pcsx_audio_pause(int);
++lilsmoke::Input input;
++volatile sig_atomic_t stopped = 0;
++uint16_t pixels[320 * 240]{};
++uint64_t frames = 0, lastReport = 0, reportFrames = 0;
++uint64_t started = 0, videoTime = 0, benchFrames = 0;
++bool benchGameplay = false;
++void signalStop(int) { stopped = 1; }
++void closeDisplay() {
++    if (menuFont) TTF_CloseFont(menuFont);
++    menuFont = nullptr;
++    TTF_Quit();
++    if (converted) SDL_FreeSurface(converted);
++    if (source) SDL_FreeSurface(source);
++    converted = source = output = nullptr;
++    if (texture) SDL_DestroyTexture(texture);
++    if (renderer) SDL_DestroyRenderer(renderer);
++    if (window) SDL_DestroyWindow(window);
++    texture = nullptr; renderer = nullptr; window = nullptr;
++    SDL_Quit();
++}
++void quitAtFrameBoundary() {
++    // Upstream has no dispatch stop API. Memcard writes are synchronous;
++    // finish stdio and filesystem writes before exiting at a frame boundary.
++    std::fprintf(stderr, "PCSX_FRONTEND_STOP frames=%llu\n",
++                 static_cast<unsigned long long>(frames));
++    if (benchFrames) {
++        uint32_t hash = 2166136261u;
++        unsigned colored = 0;
++        for (const auto p : pixels) {
++            const int r = ((p >> 11) & 31) * 255 / 31, g = ((p >> 5) & 63) * 255 / 63, b = (p & 31) * 255 / 31;
++            if (std::abs(r-g) > 12 || std::abs(r-b) > 12) ++colored;
++        }
++        for (const auto p : pixels) { hash = (hash ^ (p & 255)) * 16777619u; hash = (hash ^ (p >> 8)) * 16777619u; }
++        std::fprintf(stderr, "PCSX_BENCH frames=%llu elapsed_ms=%llu video_ms=%llu method=%s hash=%08x\n",
++        static_cast<unsigned long long>(frames), static_cast<unsigned long long>(SDL_GetTicks64()-started),
++        static_cast<unsigned long long>(videoTime), surfaceVideo ? "surface" : "renderer", hash);
++        std::fprintf(stderr, "PCSX_COLOR colored_pixels=%u total=76800 format=RGB565\n", colored);
++        const char *capture = std::getenv("LILSMOKE_BENCH_CAPTURE");
++        if (capture && !std::strncmp(capture, "/bench/", 7)) {
++            FILE *file = std::fopen(capture, "wbx");
++            if (file) {
++                std::fprintf(file, "P6\n320 240\n255\n");
++                for (const auto p : pixels) {
++                    const unsigned char rgb[] = {static_cast<unsigned char>(((p >> 11) & 31) * 255 / 31),
++                        static_cast<unsigned char>(((p >> 5) & 63) * 255 / 63), static_cast<unsigned char>((p & 31) * 255 / 31)};
++                    std::fwrite(rgb, 1, 3, file);
++                }
++                std::fclose(file);
++            }
++        }
++    }
++    std::fflush(nullptr);
++    sync();
++    closeDisplay();
++    std::exit(0);
++}
++void events() {
++    SDL_Event event;
++    while (SDL_PollEvent(&event))
++        if (event.type == SDL_QUIT ||
++            (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_F12)) stopped = 1;
++    lilsmoke::InputButton button;
++    lilsmoke::InputEvent action;
++    lilsmoke::PointerEvent pointer;
++    while (input.poll(button, action, pointer)) {
++        if (action == lilsmoke::InputEvent::Pressed && button == lilsmoke::InputButton::Power)
++            stopped = 1;
++        if (action == lilsmoke::InputEvent::Pressed && button == lilsmoke::InputButton::Home) {
++            paused = !paused; menuChoice = 0; stateMessage.clear();
++            continue;
++        }
++        if (paused && (action == lilsmoke::InputEvent::Pressed || action == lilsmoke::InputEvent::Repeat)) {
++            if (button == lilsmoke::InputButton::Up) menuChoice = (menuChoice + 4) % 5;
++            if (button == lilsmoke::InputButton::Down) menuChoice = (menuChoice + 1) % 5;
++            if (menuChoice == 1 && (button == lilsmoke::InputButton::Left || button == lilsmoke::InputButton::Right)) {
++                stateSlot = (stateSlot + (button == lilsmoke::InputButton::Left ? 9 : 1)) % 10;
++                stateMessage.clear();
++            }
++            if (action == lilsmoke::InputEvent::Pressed && button == lilsmoke::InputButton::B)
++                paused = false;
++            if (action == lilsmoke::InputEvent::Pressed && button == lilsmoke::InputButton::A) {
++                if (menuChoice == 4) stopped = 1;
++                else if (menuChoice == 0) paused = false;
++                else if (menuChoice == 1) { stateSlot = (stateSlot + 1) % 10; stateMessage.clear(); }
++                else { stateAction = menuChoice; break; }
++            }
++        }
++    }
++    const auto &state = input.state();
++    if (state.start && state.select) stopped = 1;
++    const bool chord = state.start && state.x;
++    if (chord && !menuChord) { paused = !paused; menuChoice = 0; stateMessage.clear(); }
++    menuChord = chord;
++    if (stopped) quitAtFrameBoundary();
++}
++void pauseMenu() {
++    pcsx_audio_pause(1);
++    if (!menuFont && !TTF_Init()) menuFont = TTF_OpenFont("/usr/share/fonts/dejavu/DejaVuSans.ttf", 18);
++    SDL_Surface *canvas = output ? output : SDL_CreateRGBSurfaceWithFormat(0, 320, 240, 16, SDL_PIXELFORMAT_RGB565);
++    while (paused && !stopped) {
++        // Entered via EmuUpdate's cache-safe pad_update boundary. Loading from
++        // GPU_updateLace is too late for the core's rcntFreezeLoaded guard.
++        if (stateAction) {
++            if (stateAction == 2) stateStore.save(stateSlot, stateMessage);
++            else stateStore.load(stateSlot, stateMessage);
++            stateAction = 0;
++        }
++        if (canvas) {
++            SDL_FillRect(canvas, nullptr, SDL_MapRGB(canvas->format, 24, 28, 32));
++            const std::string slot = "State slot: " + std::to_string(stateSlot) + (stateStore.exists(stateSlot) ? " (saved)" : " (empty)");
++            const std::string labels[] = {"PCSX4ALL", "Resume", slot, "Save state", "Load state", "Exit game", stateMessage};
++            const int spacing = std::min(36, (canvas->h - 12) / 7);
++            for (int row = 0; row < 7; ++row) {
++                SDL_Color color = row == menuChoice + 1 ? SDL_Color{80, 210, 160, 255} : SDL_Color{240, 240, 240, 255};
++                SDL_Surface *label = menuFont ? TTF_RenderUTF8_Blended(menuFont, labels[row].c_str(), color) : nullptr;
++                if (label) {
++                    SDL_Rect target{12, 8 + row * spacing, std::min(label->w, canvas->w - 24), label->h};
++                    if (label->w > target.w) {
++                        SDL_Surface *fitted = SDL_CreateRGBSurfaceWithFormat(0, target.w, target.h, 32, SDL_PIXELFORMAT_ARGB8888);
++                        if (fitted) { SDL_BlitScaled(label, nullptr, fitted, nullptr); SDL_BlitSurface(fitted, nullptr, canvas, &target); SDL_FreeSurface(fitted); }
++                    } else SDL_BlitSurface(label, nullptr, canvas, &target);
++                    SDL_FreeSurface(label);
++                }
++            }
++            if (output) SDL_UpdateWindowSurface(window);
++            else {
++                SDL_UpdateTexture(texture, nullptr, canvas->pixels, canvas->pitch);
++                SDL_RenderClear(renderer); SDL_RenderCopy(renderer, texture, nullptr, nullptr); SDL_RenderPresent(renderer);
++            }
++        }
++        SDL_Delay(16);
++        events();
++    }
++    if (canvas && !output) SDL_FreeSurface(canvas);
++    if (output) { SDL_FillRect(output, nullptr, 0); SDL_UpdateWindowSurface(window); }
++    pcsx_audio_pause(0);
++}
++uint16_t controller(int port) {
++    if (port != 0) return 0xffff;
++    events();
++    if (paused) { pauseMenu(); return 0xffff; }
++    const auto &s = input.state();
++    uint16_t state = 0xffff;
++    const bool pressed[] = {s.select,s.l3,s.r3,s.start,s.up,s.right,s.down,s.left,
++                            s.l2,s.r2,s.l1,s.r1,s.x,s.b,s.a,s.y};
++    for (unsigned bit = 0; bit < 16; ++bit) if (pressed[bit]) state &= ~(1U << bit);
++    if (benchGameplay) {
++        // Frame-based diagnostic input keeps display comparisons deterministic.
++        if (frames >= 200 && frames < 215) state &= ~(1U << 3);
++        if (frames >= 650 && frames < 665) state &= ~(1U << 14);
++        if (frames >= 1000 && frames < 1100) state &= ~(1U << 4);
++        if (frames >= 1200 && frames < 1250) state &= ~(1U << 14);
++        if (frames >= 1400 && frames < 1450) state &= ~(1U << 13);
++    }
++    return state;
++}
++void video(const uint16_t *frame, int width, int height, int pitch) {
++    events();
++    if (!frame || width != 320 || height != 240 || pitch < width) {
++        std::fprintf(stderr, "PCSX: invalid frame geometry\n");
++        stopped = 1;
++        return;
++    }
++    const uint64_t begin = benchFrames ? SDL_GetTicks64() : 0;
++    if (surfaceVideo) {
++        // Convert at PS1 resolution, then enlarge in the destination format.
++        // Keep the black letterbox, rather than repainting it every frame.
++        source->pixels = const_cast<uint16_t *>(frame); source->pitch = pitch * 2;
++        const int copied = nativeVideo ? SDL_BlitSurface(source, nullptr, output, &destination) :
++            (SDL_BlitSurface(source, nullptr, converted, nullptr) ||
++             SDL_BlitScaled(converted, nullptr, output, &destination));
++        if (copied || SDL_UpdateWindowSurfaceRects(window, &destination, 1)) {
++            std::fprintf(stderr, "PCSX surface: %s\n", SDL_GetError()); stopped = 1; return;
++        }
++    } else if (SDL_UpdateTexture(texture, nullptr, frame, pitch * 2) ||
++        SDL_RenderClear(renderer) || SDL_RenderCopy(renderer, texture, nullptr, nullptr)) {
++        std::fprintf(stderr, "PCSX video: %s\n", SDL_GetError());
++        stopped = 1;
++        return;
++    }
++    if (!surfaceVideo) SDL_RenderPresent(renderer);
++    if (benchFrames) videoTime += SDL_GetTicks64() - begin;
++    ++frames;
++    if (benchFrames && frames >= benchFrames) quitAtFrameBoundary();
++    const uint64_t now = SDL_GetTicks64();
++    if (now - lastReport >= 3000) {
++        std::fprintf(stderr, "PCSX_VIDEO frames=%llu presented_fps=%.2f\n",
++                     static_cast<unsigned long long>(frames),
++                     (frames - reportFrames) * 1000.0 / (now - lastReport));
++        lastReport = now; reportFrames = frames;
++    }
++}
++void log(const char *message) { if (message) std::fputs(message, stderr); }
++}
++int main(int argc, char **argv) {
++    if (argc < 1 || argc > 3) {
++        std::fprintf(stderr, "usage: pcsx4all-launch DISC [CUE]\n"); return 1;
++    }
++    std::error_code error;
++    std::string selected;
++    if (argc == 1) {
++        selected = pcsxNativeMenu();
++        if (selected.empty()) return 0;
++        // Use the same BIOS/config/audio setup as a console-list launch.
++        char *args[] = {const_cast<char *>("lilsmoke-launch"), const_cast<char *>("psx"),
++                        const_cast<char *>(selected.c_str()), const_cast<char *>("--pcsx4all"), nullptr};
++        std::fprintf(stderr, "PCSX_OWN_MENU_GAME_HANDOFF\n");
++        const char *hardware = std::getenv("LILSMOKE_HCFB");
++        const char *loading = "/usr/lib/lilsmoke/m8-loading-run";
++        if (hardware && !std::strcmp(hardware, "1") && access(loading, X_OK) == 0) {
++            char *wrapped[] = {const_cast<char *>("m8-loading-run"),
++                const_cast<char *>("/usr/lib/lilsmoke/lilsmoke-launch"), args[1], args[2], args[3], nullptr};
++            std::fprintf(stderr, "PCSX_OWN_MENU_LOADING_WRAPPER\n");
++            execv(loading, wrapped);
++            std::perror("PCSX loading wrapper handoff");
++        }
++        execv("/usr/lib/lilsmoke/lilsmoke-launch", args);
++        std::perror("PCSX native game handoff");
++        return 127;
++    }
++    const char *disc = argc == 1 ? selected.c_str() : argc == 3 ? argv[2] : argv[1];
++    if (!std::filesystem::is_regular_file(disc, error)) return 3;
++    stateStore.init(disc);
++    setenv("SDL_VIDEODRIVER", "directfb", 0);
++    setenv("SDL_AUDIODRIVER", "alsa", 0);
++    setenv("SDL_RENDER_DRIVER", "software", 1);
++    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
++        std::fprintf(stderr, "PCSX SDL: %s\n", SDL_GetError()); return 10;
++    }
++    const bool windowed = std::getenv("LILSMOKE_UI_WINDOWED");
++    const char *mode = std::getenv("LILSMOKE_PSX_VIDEO");
++    surfaceVideo = !mode || !std::strcmp(mode, "surface");
++    const char *native = std::getenv("LILSMOKE_M8_NATIVE_VIDEO");
++    nativeVideo = native && !std::strcmp(native, "1");
++    if (nativeVideo) surfaceVideo = true;
++    if (const char *limit = std::getenv("LILSMOKE_BENCH_FRAMES")) {
++        char *end = nullptr; benchFrames = std::strtoull(limit, &end, 10);
++        if (!end || *end || benchFrames > 100000) return 2;
++    }
++    benchGameplay = benchFrames && std::getenv("LILSMOKE_BENCH_GAMEPLAY");
++    window = SDL_CreateWindow("LilSmokeOS PlayStation", SDL_WINDOWPOS_UNDEFINED,
++        SDL_WINDOWPOS_UNDEFINED, nativeVideo ? 320 : 640, nativeVideo ? 240 : 480,
++        windowed || nativeVideo ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
++    if (window && surfaceVideo) {
++        output = SDL_GetWindowSurface(window);
++        source = SDL_CreateRGBSurfaceWithFormatFrom(pixels, 320, 240, 16, 640, SDL_PIXELFORMAT_RGB565);
++        if (output) {
++            if (!nativeVideo)
++                converted = SDL_CreateRGBSurfaceWithFormat(0, 320, 240, output->format->BitsPerPixel, output->format->format);
++            const int scale = output->w / 320 < output->h / 240 ? output->w / 320 : output->h / 240;
++            const int w = scale > 0 ? 320 * scale :
++                (output->w * 3 <= output->h * 4 ? output->w : output->h * 4 / 3);
++            const int h = scale > 0 ? 240 * scale : w * 3 / 4;
++            destination = {(output->w-w)/2, (output->h-h)/2, w, h};
++            if (nativeVideo && (output->w != 320 || output->h != 240 || output->format->format != SDL_PIXELFORMAT_RGB565)) {
++                std::fprintf(stderr, "PCSX native RGB565 surface unavailable; refusing desktop fallback\n");
++                closeDisplay(); return 10;
++            }
++            SDL_FillRect(output, nullptr, 0); SDL_UpdateWindowSurface(window);
++        }
++    } else if (window) renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
++    if (renderer) {
++        SDL_RenderSetLogicalSize(renderer, 320, 240);
++        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
++        texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB565, SDL_TEXTUREACCESS_STREAMING, 320, 240);
++    }
++    if (surfaceVideo ? (!source || !output || (!nativeVideo && !converted)) : !texture) {
++        std::fprintf(stderr, "PCSX display: %s\n", SDL_GetError());
++        closeDisplay(); return 10;
++    }
++    SDL_ShowCursor(SDL_DISABLE);
++    input.setKeyboardNavigation(false);
++    input.init(640, 480);
++    std::signal(SIGTERM, signalStop); std::signal(SIGINT, signalStop);
++    rkgame_pcsx_set_work_path("/persist/");
++    rkgame_pcsx_set_video_buffer(pixels, 320, 240, 320);
++    rkgame_pcsx_set_video_callback(video);
++    rkgame_pcsx_set_input_callback(controller);
++    rkgame_pcsx_set_log_callback(log);
++    lastReport = SDL_GetTicks64();
++    started = lastReport;
++    std::fprintf(stderr, "PCSX_FRONTEND_READY video=%s input=evdev audio=SDL2/native cursor=disabled\n",
++                 nativeVideo ? "native-RGB565-320x240" : "SDL2/DirectFB");
++    // PCSX_Load starts and joins a worker. This entry keeps SDL on the main
++    // thread and avoids the old launcher's second execution of the same game.
++    int result = pcsx_load_game(&disc);
++    closeDisplay();
++    return result == 0 ? 0 : 4;
++}
+--- a/src/cdrom.cpp
++++ b/src/cdrom.cpp
+@@ -1352,7 +1352,7 @@
+ 			set_loc[i] = btoi(cdr.Param[i]);
+ 
+ 		i = msf2sec(cdr.SetSectorPlay);
+-		i = abs(i - msf2sec(set_loc));
++		i = i > msf2sec(set_loc) ? i - msf2sec(set_loc) : msf2sec(set_loc) - i;
+ 		if (i > 16)
+ 			cdr.Seeked = SEEK_PENDING;
+ 
+--- a/src/misc.cpp
++++ b/src/misc.cpp
+@@ -37,6 +37,9 @@
+ #include <sys/types.h>
+ #include <time.h>
+ #include <zlib.h>
++#ifndef _WIN32
++#include <unistd.h>
++#endif
+ #if !defined(O_BINARY)
+ #define O_BINARY 0
+ #endif
+--- /dev/null
++++ b/src/port/rkgame/compat/zlib.h
+@@ -0,0 +1,71 @@
++#ifndef RKGAME_COMPAT_ZLIB_H
++#define RKGAME_COMPAT_ZLIB_H
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#define ZLIB_VERSION "1.2.11"
++#define Z_OK 0
++#define Z_NO_FLUSH 0
++#define Z_NULL 0
++
++typedef unsigned char Byte;
++typedef unsigned char Bytef;
++typedef unsigned int uInt;
++typedef unsigned long uLong;
++typedef unsigned long uLongf;
++typedef void *voidpf;
++typedef void const *voidpc;
++
++typedef voidpf (*alloc_func)(voidpf opaque, uInt items, uInt size);
++typedef void (*free_func)(voidpf opaque, voidpf address);
++
++struct internal_state;
++
++typedef struct z_stream_s {
++	Bytef *next_in;
++	uInt avail_in;
++	uLong total_in;
++	Bytef *next_out;
++	uInt avail_out;
++	uLong total_out;
++	char *msg;
++	struct internal_state *state;
++	alloc_func zalloc;
++	free_func zfree;
++	voidpf opaque;
++	int data_type;
++	uLong adler;
++	uLong reserved;
++} z_stream;
++
++typedef z_stream *z_streamp;
++typedef voidpf gzFile;
++
++int inflate(z_streamp strm, int flush);
++int inflateReset(z_streamp strm);
++int inflateEnd(z_streamp strm);
++int inflateInit2_(z_streamp strm, int windowBits, const char *version,
++		  int stream_size);
++
++#define inflateInit2(strm, windowBits) \
++	inflateInit2_((strm), (windowBits), ZLIB_VERSION, (int)sizeof(z_stream))
++
++int uncompress(Bytef *dest, uLongf *destLen, const Bytef *source,
++	       uLong sourceLen);
++int compress(Bytef *dest, uLongf *destLen, const Bytef *source,
++	     uLong sourceLen);
++
++gzFile gzopen(const char *path, const char *mode);
++gzFile gzdopen(int fd, const char *mode);
++int gzread(gzFile file, void *buf, unsigned int len);
++int gzwrite(gzFile file, voidpc buf, unsigned int len);
++long gzseek(gzFile file, long offset, int whence);
++int gzclose(gzFile file);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+--- /dev/null
++++ b/src/port/rkgame/port.cpp
+@@ -0,0 +1,204 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++// Copyright (c) 2026 Jose Pilas and contributors.
++// API integration follows PCSX4ALL's GPL SDL port; PCSX/PCSX-df/PCSX4ALL
++// teams and Ryan Schultz retain upstream rights. No vendor implementation.
++#include "port.h"
++#include "r3000a.h"
++#include "plugins.h"
++#include "plugin_lib.h"
++#include "misc.h"
++#include "spu/spu_pcsxrearmed/spu_config.h"
++#include "gpu/gpu_unai/gpu.h"
++#include <algorithm>
++#include <cerrno>
++#include <cstdio>
++#include <cstring>
++#include <fstream>
++#include <limits.h>
++#include <sstream>
++#include <string>
++#include <sys/stat.h>
++#include <time.h>
++#include <unistd.h>
++
++extern u32 cycle_multiplier;
++unsigned short *SCREEN = nullptr;
++char sstatesdir[PATH_MAX] = "/persist/states/pcsx4all";
++namespace {
++uint16_t fallback[320 * 240]{};
++int frameWidth = 320, frameHeight = 240, framePitch = 320;
++uint16_t pads[2] = {0xffff, 0xffff};
++rkgame_pcsx_video_cb present = nullptr;
++rkgame_pcsx_input_cb readPad = nullptr;
++rkgame_pcsx_log_cb logger = nullptr;
++std::string configDirectory = "/persist/config/pcsx4all";
++int analogArrow = 0, analogMode = 0;
++void report(const char *message) {
++    if (logger) logger(message); else std::fputs(message, stderr);
++}
++template<size_t N> void assign(char (&destination)[N], const std::string &value) {
++    std::snprintf(destination, N, "%s", value.c_str());
++}
++std::string environment(const char *key, const char *fallbackValue) {
++    const char *value = std::getenv(key);
++    return value && *value ? value : fallbackValue;
++}
++void defaults() {
++    Config = {};
++    configDirectory = environment("LILSMOKE_PCSX_CONFIG_ROOT", "/persist/config/pcsx4all");
++    const auto saves = environment("LILSMOKE_PCSX_SAVE_ROOT", "/persist/saves/pcsx4all");
++    const auto bios = environment("LILSMOKE_PCSX_BIOS_ROOT", "/persist/bios");
++    assign(sstatesdir, environment("LILSMOKE_PCSX_LEGACY_STATE_ROOT", "/persist/states/pcsx4all"));
++    for (const auto &path : {configDirectory, saves, bios, std::string(sstatesdir), configDirectory + "/patches"})
++        if (mkdir(path.c_str(), 0777) && errno != EEXIST) report("PCSX: cannot create runtime directory\n");
++    assign(Config.Mcd1, saves + "/mcd001.mcr"); assign(Config.Mcd2, saves + "/mcd002.mcr");
++    assign(Config.BiosDir, bios); assign(Config.Bios, "scph1001.bin");
++    assign(Config.PatchesDir, configDirectory + "/patches"); assign(Config.LastDir, configDirectory);
++    struct stat info{};
++    Config.HLE = stat((bios + "/scph1001.bin").c_str(), &info) || !S_ISREG(info.st_mode) || info.st_size != 524288;
++    Config.PsxAuto = 1; Config.Cpu = CPU_DYNAREC;
++    Config.SpuUpdateFreq = SPU_UPDATE_FREQ_16; Config.ForcedXAUpdates = FORCED_XA_UPDATES_AUTO;
++    Config.ShowFps = 1; Config.FrameLimit = 1;
++    analogArrow = analogMode = 0;
++    spu_config.iHaveConfiguration = 1; spu_config.iVolume = 1024;
++    spu_config.iXAPitch = 0; spu_config.iUseReverb = 0; spu_config.iUseInterpolation = 0;
++    spu_config.iTempo = 1; spu_config.iUseThread = 0; spu_config.iUseFixedUpdates = 1; spu_config.iDisabled = 0;
++    cycle_multiplier = 0x100;
++    gpu_unai_config_ext.ilace_force = 0; gpu_unai_config_ext.pixel_skip = 0;
++    gpu_unai_config_ext.lighting = 1; gpu_unai_config_ext.fast_lighting = 1;
++    gpu_unai_config_ext.blending = 1; gpu_unai_config_ext.dithering = 0;
++    pads[0] = pads[1] = 0xffff;
++}
++// The public CONFIG_VERSION 0 keys and compatibility aliases are data.
++// This table-based implementation replaces the recovered parser control flow.
++struct ByteSetting { const char *key; u8 PcsxConfig::*field; };
++const ByteSetting byteSettings[] = {
++    {"Xa", &PcsxConfig::Xa}, {"Mdec", &PcsxConfig::Mdec}, {"PsxAuto", &PcsxConfig::PsxAuto},
++    {"Cdda", &PcsxConfig::Cdda}, {"HLE", &PcsxConfig::HLE}, {"SlowBoot", &PcsxConfig::SlowBoot},
++    {"RCntFix", &PcsxConfig::RCntFix}, {"VSyncWA", &PcsxConfig::VSyncWA}, {"Cpu", &PcsxConfig::Cpu},
++    {"PsxType", &PcsxConfig::PsxType}, {"SpuIrq", &PcsxConfig::SpuIrq}, {"SyncAudio", &PcsxConfig::SyncAudio},
++    {"ShowFps", &PcsxConfig::ShowFps}, {"FrameLimit", &PcsxConfig::FrameLimit}
++};
++void setNumber(const std::string &key, int value) {
++    for (const auto &setting : byteSettings)
++        if (key == setting.key) { Config.*(setting.field) = static_cast<u8>(value); return; }
++    if (key == "SpuUpdateFreq") Config.SpuUpdateFreq = value >= SPU_UPDATE_FREQ_MIN && value <= SPU_UPDATE_FREQ_MAX ? value : SPU_UPDATE_FREQ_DEFAULT;
++    else if (key == "ForcedXAUpdates") Config.ForcedXAUpdates = value >= FORCED_XA_UPDATES_MIN && value <= FORCED_XA_UPDATES_MAX ? value : FORCED_XA_UPDATES_DEFAULT;
++    else if (key == "FrameSkip") Config.FrameSkip = value >= FRAMESKIP_MIN && value <= FRAMESKIP_MAX ? value : FRAMESKIP_OFF;
++    else if (key == "AnalogArrow") analogArrow = value;
++    else if (key == "Analog_Mode") analogMode = value > 2 ? 0 : value;
++    else if (key == "SpuUseInterpolation") spu_config.iUseInterpolation = value;
++    else if (key == "SpuUseReverb") spu_config.iUseReverb = value;
++    else if (key == "SpuVolume") spu_config.iVolume = std::clamp(value, 0, 1024);
++    else if (key == "CycleMultiplier") cycle_multiplier = value;
++    else if (key == "clip_368" || key == "pixel_skip") gpu_unai_config_ext.pixel_skip = value & 1;
++    else if (key == "lighting") gpu_unai_config_ext.lighting = value & 1;
++    else if (key == "fast_lighting") gpu_unai_config_ext.fast_lighting = value & 1;
++    else if (key == "blending") gpu_unai_config_ext.blending = value & 1;
++    else if (key == "dithering") gpu_unai_config_ext.dithering = value & 1;
++    else if (key == "interlace") gpu_unai_config_ext.ilace_force = value & 7;
++}
++void compatibilitySettings() {
++    const std::string title(CdromId);
++    if (title == "SLPS02124") gpu_unai_config_ext.pixel_skip = 1;
++    if (title == "SLPS03503") Config.VSyncWA = 1;
++    if (title == "SCES01564" || title == "SCES02031") analogMode = 2;
++    if (title == "SCPS45183") Config.RCntFix = 1;
++    // The previous SLES00613/SLED00690 flag was never read and had no effect.
++}
++}
++void config_load() {
++    std::ifstream stream(configDirectory + "/pcsx4all.cfg");
++    std::string line, key;
++    int version = -1;
++    if (!std::getline(stream, line)) return;
++    std::istringstream header(line);
++    if (!(header >> key >> version) || key != "CONFIG_VERSION" || version != CONFIG_VERSION) return;
++    while (std::getline(stream, line)) {
++        std::istringstream row(line);
++        std::string value;
++        if (!(row >> key)) continue;
++        std::getline(row >> std::ws, value);
++        if (!value.empty() && value.back() == '\r') value.pop_back();
++        if (key == "LastDir") assign(Config.LastDir, value);
++        else if (key == "BiosDir") assign(Config.BiosDir, value);
++        else if (key == "Bios") assign(Config.Bios, value);
++        else {
++            char *end = nullptr;
++            const long number = std::strtol(value.c_str(), &end, key == "CycleMultiplier" ? 16 : 10);
++            if (end != value.c_str() && *end == '\0') setNumber(key, static_cast<int>(number));
++        }
++    }
++}
++void config_save() {
++    std::ofstream stream(configDirectory + "/pcsx4all.cfg");
++    stream << "CONFIG_VERSION " << CONFIG_VERSION << '\n';
++    for (const auto &setting : byteSettings) stream << setting.key << ' ' << static_cast<int>(Config.*(setting.field)) << '\n';
++    stream << "SpuUpdateFreq " << static_cast<int>(Config.SpuUpdateFreq)
++           << "\nForcedXAUpdates " << static_cast<int>(Config.ForcedXAUpdates)
++           << "\nFrameSkip " << static_cast<int>(Config.FrameSkip)
++           << "\nAnalogArrow " << analogArrow << "\nAnalog_Mode " << analogMode
++           << "\nSpuUseInterpolation " << spu_config.iUseInterpolation
++           << "\nSpuUseReverb " << spu_config.iUseReverb << "\nSpuVolume " << spu_config.iVolume
++           << "\nCycleMultiplier " << std::hex << cycle_multiplier << std::dec
++           << "\ninterlace " << static_cast<int>(gpu_unai_config_ext.ilace_force)
++           << "\nclip_368 " << static_cast<int>(gpu_unai_config_ext.pixel_skip)
++           << "\nlighting " << static_cast<int>(gpu_unai_config_ext.lighting)
++           << "\nfast_lighting " << static_cast<int>(gpu_unai_config_ext.fast_lighting)
++           << "\nblending " << static_cast<int>(gpu_unai_config_ext.blending)
++           << "\ndithering " << static_cast<int>(gpu_unai_config_ext.dithering)
++           << "\nLastDir " << Config.LastDir << "\nBiosDir " << Config.BiosDir << "\nBios " << Config.Bios << '\n';
++}
++extern "C" int pcsx_load_game(const char **path) {
++    defaults(); config_load();
++    const char *disc = path && *path ? *path : "";
++    SetIsoFile(disc);
++    if (psxInit() < 0) { report("PCSX: CPU initialization failed\n"); return -1; }
++    if (LoadPlugins() < 0) { psxShutdown(); report("PCSX: plugin initialization failed\n"); return -1; }
++    if (!SCREEN) SCREEN = fallback;
++    pl_init(); psxReset();
++    int result = 0;
++    if (*disc && (CheckCdrom() < 0 || LoadCdrom() < 0)) {
++        report("PCSX: disc could not be loaded\n"); SetIsoFile(nullptr); result = -1;
++    } else {
++        compatibilitySettings();
++        if (*disc || !Config.HLE) psxCpu->Execute();
++    }
++    config_save(); ReleasePlugins(); psxShutdown();
++    return result;
++}
++extern "C" void rkgame_pcsx_set_video_buffer(uint16_t *pixels, int width, int height, int pitch) {
++    if (pixels && width > 0 && height > 0 && pitch >= width) {
++        SCREEN = pixels; frameWidth = width; frameHeight = height; framePitch = pitch;
++    }
++}
++extern "C" void rkgame_pcsx_set_video_callback(rkgame_pcsx_video_cb callback) { present = callback; }
++extern "C" void rkgame_pcsx_set_input_callback(rkgame_pcsx_input_cb callback) { readPad = callback; }
++extern "C" void rkgame_pcsx_set_log_callback(rkgame_pcsx_log_cb callback) { logger = callback; }
++// ABI compatibility only: paths no longer use a vendor-global work_path buffer.
++extern "C" void rkgame_pcsx_set_work_path(const char *) {}
++void pad_update() { if (readPad) for (int port = 0; port < 2; ++port) pads[port] = readPad(port); }
++unsigned short pad_read(int port) { return pads[port == 0 ? 0 : 1]; }
++void video_flip() { if (present) present(SCREEN ? SCREEN : fallback, frameWidth, frameHeight, framePitch); }
++void video_clear() {
++    uint16_t *pixels = SCREEN ? SCREEN : fallback;
++    for (int row = 0; row < frameHeight; ++row) std::fill_n(pixels + row * framePitch, frameWidth, 0);
++}
++void port_printf(int, int, const char *) {}
++unsigned get_ticks() {
++    timespec now{}; clock_gettime(CLOCK_MONOTONIC, &now);
++    return static_cast<unsigned>(now.tv_sec * 1000ULL + now.tv_nsec / 1000000);
++}
++void wait_ticks(unsigned milliseconds) {
++    timespec pause{static_cast<time_t>(milliseconds / 1000), static_cast<long>(milliseconds % 1000) * 1000000};
++    while (nanosleep(&pause, &pause) && errno == EINTR) {}
++}
++int SelectGame() { return 0; }
++int GameMenu() { return 0; }
++int state_load(int slot) {
++    const auto file = std::string(sstatesdir) + "/" + CdromId + "." + std::to_string(slot) + ".sav";
++    return FileExists(file.c_str()) ? LoadState(file.c_str()) : -1;
++}
++int state_save(int slot) {
++    return SaveState((std::string(sstatesdir) + "/" + CdromId + "." + std::to_string(slot) + ".sav").c_str());
++}
+--- /dev/null
++++ b/src/port/rkgame/port.h
+@@ -0,0 +1,39 @@
++#ifndef __PSXPORT_H__
++#define __PSXPORT_H__
++
++#include <assert.h>
++#include <ctype.h>
++#include <math.h>
++#include <stdarg.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/types.h>
++#include <time.h>
++
++#define CONFIG_VERSION 0
++
++unsigned get_ticks(void);
++void wait_ticks(unsigned s);
++void pad_update(void);
++unsigned short pad_read(int num);
++
++void video_flip(void);
++#ifdef GPU_DFXVIDEO
++void video_set(unsigned short *pVideo, unsigned int width, unsigned int height);
++#endif
++void video_clear(void);
++void port_printf(int x, int y, const char *text);
++
++extern unsigned short *SCREEN;
++
++int state_load(int slot);
++int state_save(int slot);
++
++int SelectGame(void);
++int GameMenu(void);
++
++#include "rkgame_bridge.h"
++
++#endif
+--- /dev/null
++++ b/src/port/rkgame/rkgame_bridge.h
+@@ -0,0 +1,33 @@
++#ifndef RKGAME_BRIDGE_H
++#define RKGAME_BRIDGE_H
++
++#include <stddef.h>
++#include <stdint.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef void (*rkgame_pcsx_video_cb)(const uint16_t *frame,
++                                     int width,
++                                     int height,
++                                     int pitch_pixels);
++typedef uint16_t (*rkgame_pcsx_input_cb)(int port);
++typedef void (*rkgame_pcsx_log_cb)(const char *message);
++
++void rkgame_pcsx_set_work_path(const char *path);
++void rkgame_pcsx_set_video_buffer(uint16_t *buffer,
++                                  int width,
++                                  int height,
++                                  int pitch_pixels);
++void rkgame_pcsx_set_video_callback(rkgame_pcsx_video_cb cb);
++void rkgame_pcsx_set_input_callback(rkgame_pcsx_input_cb cb);
++void rkgame_pcsx_set_log_callback(rkgame_pcsx_log_cb cb);
++
++int pcsx_load_game(const char **game_path);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+--- a/src/r3000a.cpp
++++ b/src/r3000a.cpp
+@@ -37,15 +37,31 @@
+ psxRegisters psxRegs;
+ 
+ int psxInit() {
++#ifdef RKGAME_PCSX_BUILD_DATE
++	printf("Running PCSX Version %s (%s).\n", PACKAGE_VERSION, RKGAME_PCSX_BUILD_DATE);
++#else
+ 	printf("Running PCSX Version %s (%s).\n", PACKAGE_VERSION, __DATE__);
++#endif
++
++#ifdef RKGAME_FIRMWARE
++	printf("%s:%d %d\n", "psxInit", 44, (unsigned int)Config.Cpu);
++#endif
+ 
+ #ifdef PSXREC
+ 	#ifndef interpreter_none
+ 	if (Config.Cpu == CPU_INTERPRETER) {
++#ifdef RKGAME_FIRMWARE
++		printf("%s:%d\n", "psxInit", 46);
++#endif
+ 		psxCpu = &psxInt;
+ 	} else
+ 	#endif
++	{
++#ifdef RKGAME_FIRMWARE
++		printf("%s:%d\n", "psxInit", 50);
++#endif
+ 	psxCpu = &psxRec;
++	}
+ #else
+ 	psxCpu = &psxInt;
+ #endif
+--- a/src/recompiler/mips/rec_mdu.cpp.h
++++ b/src/recompiler/mips/rec_mdu.cpp.h
+@@ -351,17 +351,19 @@
+ 			return;
+ 		} else {
+ 			// If divisor is a const power-of-two, we can get result by shifting
+-			bool rt_pot = (rt_val != 0x80000000) && ((abs(rt_val) & (abs(rt_val) - 1)) == 0);
++			const u32 rt_magnitude = (rt_val & 0x80000000U) ? 0U - rt_val : rt_val;
++			bool rt_pot = rt_magnitude != 0 && rt_val != 0x80000000U &&
++				((rt_magnitude & (rt_magnitude - 1)) == 0);
+ 
+ 			if (rt_pot) {
+ 				u32 rs = regMipsToHost(_Rs_, REG_LOAD, REG_REGISTER);
+ 
+ 				// Count trailing 0s of const power-of-two divisor to get right-shift amount
+-				u32 pot_val = (u32)abs(rt_val);
++				u32 pot_val = rt_magnitude;
+ 				u32 shift_amt = __builtin_ctz(pot_val);
+ 
+ 				u32 work_reg = rs;
+-				bool negate_res = (rt_val < 0);
++				bool negate_res = ((s32)rt_val < 0);
+ 
+ 				if (negate_res) {
+ 					SUBU(TEMP_2, 0, rs);
+--- a/src/spu/spu_pcsxrearmed/out.c
++++ b/src/spu/spu_pcsxrearmed/out.c
+@@ -34,6 +34,9 @@
+ #ifdef HAVE_SDL
+ 			REGISTER_DRIVER(sdl);
+ #endif
++#ifdef HAVE_SDL2
++			REGISTER_DRIVER(sdl2);
++#endif
+ #ifdef HAVE_PULSE
+ 			REGISTER_DRIVER(pulse);
+ #endif
+--- /dev/null
++++ b/src/spu/spu_pcsxrearmed/sdl2.c
+@@ -0,0 +1,51 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++#include <SDL2/SDL.h>
++#include <stdio.h>
++#include "out.h"
++
++/* 125 ms maximum. SDL's native M8 adapter delivers queued stereo PCM to the
++ * isolated vendor worker; ordinary Linux continues to use SDL's real driver. */
++#define QUEUE_LIMIT (44100U * 4U / 8U)
++static SDL_AudioDeviceID device;
++
++static int sdl2_init(void) {
++    SDL_AudioSpec wanted = {0};
++    if (SDL_InitSubSystem(SDL_INIT_AUDIO)) return -1;
++    wanted.freq = 44100;
++    wanted.format = AUDIO_S16SYS;
++    wanted.channels = 2;
++    wanted.samples = 512;
++    device = SDL_OpenAudioDevice(NULL, 0, &wanted, NULL, 0);
++    if (!device) {
++        fprintf(stderr, "PCSX audio unavailable: %s\n", SDL_GetError());
++        return -1;
++    }
++    SDL_PauseAudioDevice(device, 0);
++    return 0;
++}
++static void sdl2_finish(void) {
++    if (device) SDL_CloseAudioDevice(device);
++    device = 0;
++}
++static int sdl2_busy(void) {
++    return !device || SDL_GetQueuedAudioSize(device) >= QUEUE_LIMIT / 2;
++}
++static void sdl2_feed(void *data, int bytes) {
++    if (!device || !data || bytes <= 0 || bytes % 4) return;
++    const unsigned queued = SDL_GetQueuedAudioSize(device);
++    if ((unsigned)bytes > QUEUE_LIMIT || queued > QUEUE_LIMIT - (unsigned)bytes) return;
++    if (SDL_QueueAudio(device, data, (unsigned)bytes))
++        fprintf(stderr, "PCSX audio queue: %s\n", SDL_GetError());
++}
++void pcsx_audio_pause(int pause) {
++    if (!device) return;
++    SDL_PauseAudioDevice(device, pause != 0);
++    SDL_ClearQueuedAudio(device);
++}
++void out_register_sdl2(struct out_driver *driver) {
++    driver->name = "sdl2-native";
++    driver->init = sdl2_init;
++    driver->finish = sdl2_finish;
++    driver->busy = sdl2_busy;
++    driver->feed = sdl2_feed;
++}
+--- /dev/null
++++ b/state-io.h
+@@ -0,0 +1,157 @@
++// Copyright (c) 2026 Jose Pilas and contributors.
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++// SPDX-License-Identifier: MPL-2.0
++#pragma once
++
++#include "src/psxcommon.h"
++#include <algorithm>
++#include <cerrno>
++#include <cstdio>
++#include <cstring>
++#include <fcntl.h>
++#include <sys/syscall.h>
++#include <unistd.h>
++#include <zlib.h>
++
++// Scoped to paused engine serialization. Never replace the qualified core.
++class PcsxStateIo {
++public:
++    PcsxStateIo() : previous_(SaveFuncs) {
++        active_ = this;
++        SaveFuncs.open = openFile;
++        SaveFuncs.read = readFile;
++        SaveFuncs.write = writeFile;
++        SaveFuncs.seek = seekFile;
++        SaveFuncs.close = closeFile;
++    }
++    ~PcsxStateIo() { SaveFuncs = previous_; active_ = nullptr; }
++    PcsxStateIo(const PcsxStateIo &) = delete;
++    PcsxStateIo &operator=(const PcsxStateIo &) = delete;
++
++    static bool syncFile(int fd, bool directory) {
++        if (fsync(fd) == 0) return true;
++        const int error = errno;
++        if (error != ENOSYS && error != EOPNOTSUPP && !(directory && error == EINVAL)) {
++            diagnostic("fsync", error, 0);
++            return false;
++        }
++        std::fprintf(stderr, "PCSX_STATE_SYNC_FALLBACK stage=fsync errno=%d directory=%d next=%s\n",
++                     error, directory, directory ? "syncfs" : "fdatasync");
++        // Both fallbacks report errors. A void sync() is not proof of success.
++        const int result = directory ? static_cast<int>(syscall(SYS_syncfs, fd)) : fdatasync(fd);
++        if (result == 0) return true;
++        diagnostic(directory ? "syncfs" : "fdatasync", errno, 0);
++        return false;
++    }
++
++    static void diagnostic(const char *stage, int error, int zerror) {
++        std::fprintf(stderr, "PCSX_STATE_IO_ERROR stage=%s errno=%d error=%s zlib=%d\n",
++                     stage, error, error ? std::strerror(error) : "none", zerror);
++    }
++
++    bool engineResult(int result, const char *operation, const char *path) const {
++        if (result == 0 && !failed_) return true;
++        std::fprintf(stderr, "PCSX_STATE_ENGINE_ERROR operation=%s path=%s result=%d errno=%d bytes=%llu io_failed=%d\n",
++                     operation, path, result, errno, static_cast<unsigned long long>(bytes_), failed_);
++        return false;
++    }
++
++private:
++    inline static PcsxStateIo *active_ = nullptr;
++    PcsxSaveFuncs previous_;
++    bool writing_ = false, failed_ = false;
++    uint64_t bytes_ = 0;
++
++    static void *openFile(const char *name, boolean writing) {
++        auto &io = *active_;
++        io.writing_ = writing;
++        io.bytes_ = 0;
++        io.failed_ = false;
++        SaveFuncs.fd = SaveFuncs.lib_fd = -1;
++        errno = 0;
++        SaveFuncs.fd = open(name, (writing ? O_RDWR | O_CREAT | O_TRUNC : O_RDONLY) | O_CLOEXEC, 0600);
++        const char *stage = "open";
++        if (SaveFuncs.fd >= 0) {
++            stage = "dup";
++            SaveFuncs.lib_fd = dup(SaveFuncs.fd);
++            if (SaveFuncs.lib_fd >= 0) {
++                stage = "gzdopen";
++                if (gzFile file = gzdopen(SaveFuncs.lib_fd, writing ? "wb4" : "rb")) return file;
++            }
++        }
++        const int error = errno;
++        io.failed_ = true;
++        diagnostic(stage, error, 0);
++        if (SaveFuncs.lib_fd >= 0) close(SaveFuncs.lib_fd);
++        if (SaveFuncs.fd >= 0) close(SaveFuncs.fd);
++        SaveFuncs.fd = SaveFuncs.lib_fd = -1;
++        errno = error;
++        return nullptr;
++    }
++
++    static int transfer(void *file, void *data, u32 len, bool writing) {
++        auto &io = *active_;
++        // The legacy serializer skips screenshot bytes if malloc fails, which
++        // otherwise produces a CRC-valid but shifted/unloadable state.
++        if (writing && io.bytes_ == 32 + sizeof(u32) + sizeof(boolean) && len != 160 * 120 * 2) {
++            io.failed_ = true;
++            diagnostic("screenshot-allocation", ENOMEM, 0);
++            errno = ENOMEM;
++            return -1;
++        }
++        char buffer[8192];
++        u32 done = 0;
++        // MIPS JIT psxM is a valid mapping at address zero. zlib rejects NULL
++        // next_in/next_out even though memcpy can access that mapped memory.
++        // Always stage, and compile this frontend with -fno-delete-null-pointer-checks.
++        auto address = reinterpret_cast<uintptr_t>(data);
++        while (done < len) {
++            const unsigned chunk = std::min<unsigned>(sizeof buffer, len - done);
++            errno = 0;
++            int count;
++            if (writing) {
++                std::memcpy(buffer, reinterpret_cast<const void *>(address + done), chunk);
++                count = gzwrite(static_cast<gzFile>(file), buffer, chunk);
++            } else {
++                count = gzread(static_cast<gzFile>(file), buffer, chunk);
++                if (count > 0) std::memcpy(reinterpret_cast<void *>(address + done), buffer, count);
++            }
++            if (count != static_cast<int>(chunk)) {
++                const int error = errno;
++                int zerror = 0;
++                const char *detail = gzerror(static_cast<gzFile>(file), &zerror);
++                io.failed_ = true;
++                diagnostic(writing ? "gzwrite" : "gzread", error, zerror);
++                std::fprintf(stderr, "PCSX_STATE_TRANSFER requested=%u completed=%u bytes=%llu detail=%s\n",
++                             len, done, static_cast<unsigned long long>(io.bytes_), detail);
++                errno = error;
++                return -1;
++            }
++            done += chunk;
++            io.bytes_ += chunk;
++        }
++        return static_cast<int>(done);
++    }
++
++    static int readFile(void *file, void *data, u32 len) { return transfer(file, data, len, false); }
++    static int writeFile(void *file, const void *data, u32 len) {
++        return transfer(file, const_cast<void *>(data), len, true);
++    }
++    static long seekFile(void *file, long offset, int whence) {
++        const long result = gzseek(static_cast<gzFile>(file), offset, whence);
++        if (result < 0) { active_->failed_ = true; diagnostic("gzseek", errno, 0); }
++        return result;
++    }
++    static int closeFile(void *file) {
++        auto &io = *active_;
++        const int result = gzclose(static_cast<gzFile>(file));
++        if (result != Z_OK) { io.failed_ = true; diagnostic("gzclose", errno, result); }
++        // Read-only loads/checks must not require any syncing syscall.
++        if (io.writing_ && !io.failed_ && !syncFile(SaveFuncs.fd, false)) io.failed_ = true;
++        if (close(SaveFuncs.fd) != 0) { io.failed_ = true; diagnostic("close", errno, 0); }
++        SaveFuncs.fd = SaveFuncs.lib_fd = -1;
++        return io.failed_ ? -1 : 0;
++    }
++};
+--- /dev/null
++++ b/state-store.h
+@@ -0,0 +1,157 @@
++// Copyright (c) 2026 Jose Pilas and contributors.
++// This Source Code Form is subject to the terms of the Mozilla Public
++// License, v. 2.0. If a copy of the MPL was not distributed with this
++// file, You can obtain one at https://mozilla.org/MPL/2.0/.
++// SPDX-License-Identifier: MPL-2.0
++#pragma once
++
++#include "state-io.h"
++#include <cstdint>
++#include <cstdio>
++#include <cstdlib>
++#include <filesystem>
++#include <fcntl.h>
++#include <string>
++#include <unistd.h>
++#include <zlib.h>
++
++// Use the engine's serializer directly. The legacy pcsx_* wrappers create a
++// second pointer file and silently rewrite the last three filename characters.
++int SaveState(const char *);
++int LoadState(const char *);
++int CheckState(const char *, bool *, bool, uint16_t *);
++
++class PcsxStateStore {
++public:
++    void init(const std::string &disc) {
++        const char *root = std::getenv("LILSMOKE_STATE_ROOT");
++        const char *original = std::getenv("LILSMOKE_STATE_CONTENT");
++        std::error_code ec;
++        auto identity = std::filesystem::weakly_canonical(original && *original ? original : disc, ec).string();
++        if (ec) identity = original && *original ? original : disc;
++        uint64_t hash = UINT64_C(14695981039346656037);
++        for (unsigned char c : identity) hash = (hash ^ c) * UINT64_C(1099511628211);
++        char key[17]; std::snprintf(key, sizeof key, "%016llx", static_cast<unsigned long long>(hash));
++        directory_ = std::filesystem::path(root && *root ? root : "/persist/states") / "pcsx4all" / key;
++    }
++
++    std::filesystem::path path(int slot) const {
++        return directory_ / ("slot-" + std::to_string(slot) + ".state");
++    }
++
++    bool exists(int slot) const {
++        std::error_code ec;
++        return std::filesystem::is_regular_file(path(slot), ec);
++    }
++
++    bool save(int slot, std::string &message) const {
++        std::error_code ec;
++        std::filesystem::create_directories(directory_, ec);
++        if (ec) {
++            PcsxStateIo::diagnostic("mkdir", ec.value(), 0);
++            return storageFail(message, "Cannot create state directory", ec.value());
++        }
++        PcsxStateIo io;
++        int error = 0;
++        const auto target = path(slot), temporary = temporaryFile(".saving-", error);
++        if (temporary.empty()) return storageFail(message, "Cannot create state file", error);
++        errno = 0;
++        if (!io.engineResult(SaveState(temporary.c_str()), "save", temporary.c_str()) || !valid(temporary)) {
++            std::filesystem::remove(temporary, ec);
++            return fail(message, "Save failed; see storage log");
++        }
++        std::filesystem::rename(temporary, target, ec);
++        if (ec) {
++            const int error = ec.value();
++            PcsxStateIo::diagnostic("rename", error, 0);
++            std::filesystem::remove(temporary, ec);
++            return storageFail(message, "Could not commit saved state", error);
++        }
++        const int fd = open(directory_.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
++        if (fd < 0) PcsxStateIo::diagnostic("open-directory", errno, 0);
++        bool durable = fd >= 0 && PcsxStateIo::syncFile(fd, true);
++        if (fd >= 0 && close(fd) != 0) { PcsxStateIo::diagnostic("close-directory", errno, 0); durable = false; }
++        if (!durable) return fail(message, "State written; sync failed");
++        message = "Saved slot " + std::to_string(slot);
++        std::fprintf(stderr, "PCSX_STATE_SAVE slot=%d path=%s\n", slot, target.c_str());
++        return true;
++    }
++
++    bool load(int slot, std::string &message) const {
++        const auto target = path(slot);
++        if (!exists(slot)) return fail(message, "This state slot is empty");
++        PcsxStateIo io;
++        if (!valid(target)) return fail(message, "Invalid or damaged saved state");
++        // Loading may mutate RAM before reporting failure. Keep an actual engine
++        // checkpoint, never overwrite a previous failed-recovery artifact.
++        int error = 0;
++        const auto recovery = temporaryFile(".recovery-", error);
++        if (recovery.empty()) return storageFail(message, "Load cancelled: no recovery file", error);
++        errno = 0;
++        if (!io.engineResult(SaveState(recovery.c_str()), "checkpoint", recovery.c_str()) || !valid(recovery)) {
++            std::error_code ec; std::filesystem::remove(recovery, ec);
++            return fail(message, "Load cancelled: checkpoint failed");
++        }
++        const bool loaded = io.engineResult(LoadState(target.c_str()), "load", target.c_str());
++        if (!loaded && !io.engineResult(LoadState(recovery.c_str()), "rollback", recovery.c_str())) {
++            message = "Load recovery failed; exit game";
++            std::fprintf(stderr, "PCSX_STATE_RECOVERY_FAILED path=%s\n", recovery.c_str());
++            return false;
++        }
++        std::error_code ec; std::filesystem::remove(recovery, ec);
++        if (!loaded) return fail(message, "State incompatible; game restored");
++        message = "Loaded slot " + std::to_string(slot);
++        std::fprintf(stderr, "PCSX_STATE_LOAD slot=%d path=%s\n", slot, target.c_str());
++        return true;
++    }
++
++private:
++    std::filesystem::path directory_;
++
++    std::filesystem::path temporaryFile(const char *prefix, int &error) const {
++        error = 0;
++        std::string name = (directory_ / (std::string(prefix) + "XXXXXX")).string();
++        const int fd = mkstemp(name.data());
++        if (fd < 0) { error = errno; PcsxStateIo::diagnostic("mkstemp", error, 0); return {}; }
++        if (close(fd) != 0) {
++            error = errno;
++            PcsxStateIo::diagnostic("close-temporary", error, 0);
++            unlink(name.c_str());
++            return {};
++        }
++        return name;
++    }
++
++    static bool valid(const std::filesystem::path &target) {
++        // Check the complete gzip stream before the engine mutates emulated RAM.
++        // A streaming scan avoids another multi-megabyte allocation on 128 MB MIPS.
++        gzFile file = gzopen(target.c_str(), "rb");
++        if (!file) { PcsxStateIo::diagnostic("validate-open", errno, 0); return false; }
++        char buffer[8192]; size_t size = 0; int count;
++        while ((count = gzread(file, buffer, sizeof buffer)) > 0) {
++            size += static_cast<size_t>(count);
++            if (size > 16 * 1024 * 1024) break;
++        }
++        const int closed = gzclose(file);
++        if (count != 0 || closed != Z_OK || size < 3 * 1024 * 1024 ||
++            CheckState(target.c_str(), nullptr, false, nullptr) != 0)
++        {
++            std::fprintf(stderr, "PCSX_STATE_INVALID path=%s bytes=%zu read=%d close=%d errno=%d\n",
++                         target.c_str(), size, count, closed, errno);
++            return false;
++        }
++        return true;
++    }
++    static bool storageFail(std::string &message, const char *fallback, int error) {
++        if (error == EROFS) return fail(message, "Storage read-only; repair SD");
++        if (error == ENOSPC) return fail(message, "Storage full; free SD space");
++        if (error == EACCES || error == EPERM) return fail(message, "Storage permission denied");
++        if (error == EIO) return fail(message, "SD I/O error; check card");
++        return fail(message, fallback);
++    }
++    static bool fail(std::string &message, const char *error) {
++        message = error;
++        std::fprintf(stderr, "PCSX_STATE_ERROR %s\n", error);
++        return false;
++    }
++};

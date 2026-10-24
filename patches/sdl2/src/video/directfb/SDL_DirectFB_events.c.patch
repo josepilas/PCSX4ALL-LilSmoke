@@ -1,0 +1,76 @@
+--- a/src/video/directfb/SDL_DirectFB_events.c
++++ b/src/video/directfb/SDL_DirectFB_events.c
+@@ -571,20 +571,27 @@
+ {
+     SDL_DFB_DEVICEDATA(_this);
+     int kbd_idx = 0; /* Window events lag the device source KbdIndex(_this, evt->device_id); */
+-    DFB_KeyboardData *kbd = &devdata->keyboard[kbd_idx];
++    DFB_KeyboardData *kbd = devdata->num_keyboard > 0 ? &devdata->keyboard[kbd_idx] : NULL;
+ 
+     keysym->scancode = SDL_SCANCODE_UNKNOWN;
+ 
+-    if (kbd->map && evt->key_code >= kbd->map_adjust &&
++    if (kbd && kbd->map && evt->key_code >= kbd->map_adjust &&
+         evt->key_code < kbd->map_size + kbd->map_adjust)
+         keysym->scancode = kbd->map[evt->key_code - kbd->map_adjust];
+ 
+-    if (keysym->scancode == SDL_SCANCODE_UNKNOWN ||
+-        devdata->keyboard[kbd_idx].is_generic) {
++    if (!kbd || keysym->scancode == SDL_SCANCODE_UNKNOWN || kbd->is_generic) {
+         if (evt->key_id - DIKI_UNKNOWN < SDL_arraysize(oskeymap))
+             keysym->scancode = oskeymap[evt->key_id - DIKI_UNKNOWN];
+         else
+             keysym->scancode = SDL_SCANCODE_UNKNOWN;
++    }
++
++    /* Opt-in only when DirectFB uses the Linux evdev input driver. */
++    if (SDL_getenv("LILSMOKE_DFB_EVDEV_KEYCODES")) {
++        if (evt->key_code == 28) /* Linux KEY_ENTER */
++            keysym->scancode = SDL_SCANCODE_RETURN;
++        else if (evt->key_code == 96) /* Linux KEY_KPENTER */
++            keysym->scancode = SDL_SCANCODE_KP_ENTER;
+     }
+ 
+     *unicode =
+@@ -601,19 +608,27 @@
+ {
+     SDL_DFB_DEVICEDATA(_this);
+     int kbd_idx = KbdIndex(_this, evt->device_id);
+-    DFB_KeyboardData *kbd = &devdata->keyboard[kbd_idx];
++    DFB_KeyboardData *kbd = kbd_idx >= 0 && kbd_idx < devdata->num_keyboard ? &devdata->keyboard[kbd_idx] : NULL;
+ 
+     keysym->scancode = SDL_SCANCODE_UNKNOWN;
+ 
+-    if (kbd->map && evt->key_code >= kbd->map_adjust &&
++    if (kbd && kbd->map && evt->key_code >= kbd->map_adjust &&
+         evt->key_code < kbd->map_size + kbd->map_adjust)
+         keysym->scancode = kbd->map[evt->key_code - kbd->map_adjust];
+ 
+-    if (keysym->scancode == SDL_SCANCODE_UNKNOWN || devdata->keyboard[kbd_idx].is_generic) {
++    if (!kbd || keysym->scancode == SDL_SCANCODE_UNKNOWN || kbd->is_generic) {
+         if (evt->key_id - DIKI_UNKNOWN < SDL_arraysize(oskeymap))
+             keysym->scancode = oskeymap[evt->key_id - DIKI_UNKNOWN];
+         else
+             keysym->scancode = SDL_SCANCODE_UNKNOWN;
++    }
++
++    /* Opt-in only when DirectFB uses the Linux evdev input driver. */
++    if (SDL_getenv("LILSMOKE_DFB_EVDEV_KEYCODES")) {
++        if (evt->key_code == 28) /* Linux KEY_ENTER */
++            keysym->scancode = SDL_SCANCODE_RETURN;
++        else if (evt->key_code == 96) /* Linux KEY_KPENTER */
++            keysym->scancode = SDL_SCANCODE_KP_ENTER;
+     }
+ 
+     *unicode =
+@@ -660,7 +675,9 @@
+             return DFENUM_OK;
+     }
+ 
+-    if ((desc.caps & DIDTF_KEYBOARD)) {
++    if (desc.caps & DICAPS_KEYS) {
++        if (devdata->num_keyboard >= SDL_arraysize(devdata->keyboard))
++            return DFENUM_CANCEL;
+ #if USE_MULTI_API
+         SDL_zero(keyboard);
+         SDL_AddKeyboard(&keyboard, devdata->num_keyboard);

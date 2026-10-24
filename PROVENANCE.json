@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/dmitrysmagin/pcsx4all",
+  "comparison_commit": "c7faf12b893eba94faced88baa5e7dd059be58b7",
+  "archive_sha256": "82823b97245ed9b2a24cb1c71a1b2f20a5c1bc7507f09f7f5ee0ed299dcc8a64",
+  "original_import_commit": null,
+  "note": "Comparison pin is not proof of the original import commit.",
+  "local_changed_or_added_files": [
+    "Makefile.rkgame",
+    "native-menu.cpp",
+    "native-menu.h",
+    "pcsx4all-launch.cpp",
+    "src/cdrom.cpp",
+    "src/misc.cpp",
+    "src/port/rkgame/compat/zlib.h",
+    "src/port/rkgame/port.cpp",
+    "src/port/rkgame/port.h",
+    "src/port/rkgame/rkgame_bridge.h",
+    "src/r3000a.cpp",
+    "src/recompiler/mips/rec_mdu.cpp.h",
+    "src/spu/spu_pcsxrearmed/out.c",
+    "src/spu/spu_pcsxrearmed/sdl2.c",
+    "state-io.h",
+    "state-store.h"
+  ],
+  "curated_baseline": "third_party/distfiles/pcsx4all-upstream-code-only.tar.gz",
+  "curated_baseline_sha256": "5fc33c91981d3cbaa3ef86bdd88b2282c18f1c3c08fed91203e60eff96fc5cfc",
+  "omitted_upstream_artwork": true,
+  "source_line_endings": "Core snapshot preserves CRLF; patch context normalizes CRLF to LF.",
+  "public_bridge": "Independent PCSX GPL API implementation; no recovered vendor object/body",
+  "frontend": "Freshly built with exported support closure"
+}

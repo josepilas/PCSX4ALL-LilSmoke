@@ -1,0 +1,88 @@
+{
+  "compiler": "mipsel-buildroot-linux-musl-g++.br_real (Buildroot 2024.02.3) 12.3.0",
+  "runtime_binary_sha256": "eb121e5ead36387128fc2b41ed821907c5cafc9d02c90f4a86ac26d8d85319e6",
+  "core_archive_sha256": "9743f6980e75cea3047283196ad82ffef8686aee648faac4ea2dd8b5021ffd0d",
+  "complete_corresponding_source": true,
+  "built_from_public_export": true,
+  "dependencies_rebuilt_from_included_sources": [
+    "libzlib",
+    "libpng",
+    "freetype",
+    "sdl2",
+    "sdl2_ttf"
+  ],
+  "cpus": 1,
+  "compiler_as_limit": 805306368,
+  "sdk_modified": false,
+  "qualification": {
+    "passed": true,
+    "cases": [
+      "normal",
+      "sync-enosys",
+      "all-sync-enosys",
+      "io-error",
+      "rename-error",
+      "enospc",
+      "gpu-oom",
+      "screenshot-oom",
+      "readonly"
+    ],
+    "production_menu": true,
+    "memory_mib": 120,
+    "data_limit_mib": 80,
+    "cpu": "74Kf-lilsmoke",
+    "cpus": 1,
+    "syscall_faults": "guest-kernel seccomp",
+    "physical_vendor_kernel_tested": false,
+    "engine_test_sha256": "113ca456e1400332640e0c428bb2018aa3ff31b29bd41124ab85be8b98099537",
+    "core_archive_sha256": "9743f6980e75cea3047283196ad82ffef8686aee648faac4ea2dd8b5021ffd0d",
+    "bundled_libraries": {
+      "libSDL2-2.0.so.0.2800.5": "aded9524796b143edb4ebd1df454527959c6dd42f4087c6894cc14db10a85538",
+      "libSDL2-2.0.so.0": "aded9524796b143edb4ebd1df454527959c6dd42f4087c6894cc14db10a85538",
+      "libfreetype.so.6.20.1": "7817974e5fb85c62e62878560c467b71a3de10246dcec46d27b26c5e97c88dbe",
+      "libz.so.1.3.1": "1f964bf368e5c2dcaa8ac3bb1eab015f773775752433333ad71c5d80f1784d24",
+      "libz.so.1": "1f964bf368e5c2dcaa8ac3bb1eab015f773775752433333ad71c5d80f1784d24",
+      "libpng16.so.16": "803062c2237cd0c68cb21f106fa170cee3f7c110314eea6beb50538837f414ac",
+      "libfreetype.so.6": "7817974e5fb85c62e62878560c467b71a3de10246dcec46d27b26c5e97c88dbe",
+      "libpng16.so.16.43.0": "803062c2237cd0c68cb21f106fa170cee3f7c110314eea6beb50538837f414ac",
+      "libSDL2_ttf-2.0.so.0": "000f2e0246d6113c0555d0fe9d7069cf0d92b700cd88311998f59dbc7f2a4b22",
+      "libSDL2_ttf-2.0.so.0.2200.0": "000f2e0246d6113c0555d0fe9d7069cf0d92b700cd88311998f59dbc7f2a4b22"
+    },
+    "nonzero_spu_audio": {
+      "normal": {
+        "bytes": "759544",
+        "nonzero": "542550"
+      },
+      "sync-enosys": {
+        "bytes": "711440",
+        "nonzero": "508146"
+      },
+      "all-sync-enosys": {
+        "bytes": "267528",
+        "nonzero": "191090"
+      },
+      "io-error": {
+        "bytes": "532856",
+        "nonzero": "380604"
+      },
+      "rename-error": {
+        "bytes": "538016",
+        "nonzero": "384286"
+      },
+      "enospc": {
+        "bytes": "530648",
+        "nonzero": "379030"
+      },
+      "gpu-oom": {
+        "bytes": "538024",
+        "nonzero": "384286"
+      },
+      "screenshot-oom": {
+        "bytes": "532144",
+        "nonzero": "380096"
+      }
+    },
+    "fixture": "Original authored GPU/SPU/RAM test disc, no commercial assets"
+  },
+  "physical_exact_release_tested": false
+}

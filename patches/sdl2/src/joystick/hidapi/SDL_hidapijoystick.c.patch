@@ -1,0 +1,31 @@
+--- a/src/joystick/hidapi/SDL_hidapijoystick.c
++++ b/src/joystick/hidapi/SDL_hidapijoystick.c
+@@ -31,6 +31,9 @@
+ #include "SDL_hidapijoystick_c.h"
+ #include "SDL_hidapi_rumble.h"
+ #include "../../SDL_hints_c.h"
++#ifdef __LINUX__
++#include <unistd.h>
++#endif
+ 
+ #if defined(__WIN32__) || defined(__WINGDK__)
+ #include "../windows/SDL_rawinputjoystick_c.h"
+@@ -413,6 +416,18 @@
+ {
+     *removed = SDL_FALSE;
+ 
++#ifdef __LINUX__
++    if (!SDL_GetHintBoolean("LILSMOKE_HIDAPI_POLL", SDL_FALSE)) {
++        const char *state = SDL_getenv("LILSMOKE_GAMEPAD_STATE");
++        if (access(state ? state : "/run/lilsmoke-gamepads.state", F_OK) == 0) {
++            if (device->driver) {
++                HIDAPI_CleanupDeviceDriver(device);
++            }
++            return;
++        }
++    }
++#endif
++
+     if (device->driver) {
+         SDL_bool enabled;
+ 

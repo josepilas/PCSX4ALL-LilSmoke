@@ -1,0 +1,22 @@
+--- a/src/hidapi/SDL_hidapi.c
++++ b/src/hidapi/SDL_hidapi.c
+@@ -30,6 +30,7 @@
+ #include "../SDL_internal.h"
+ 
+ #include "SDL_loadso.h"
++#include "SDL_hints.h"
+ #include "SDL_hidapi.h"
+ #include "SDL_thread.h"
+ #include "SDL_timer.h"
+@@ -366,8 +367,9 @@
+         HIDAPI_InitializeDiscovery();
+     }
+ 
+-    if (!SDL_HIDAPI_discovery.m_bCanGetNotifications) {
+-        const Uint32 SDL_HIDAPI_DETECT_INTERVAL_MS = 3000; /* Update every 3 seconds */
++    if (!SDL_HIDAPI_discovery.m_bCanGetNotifications ||
++        SDL_GetHintBoolean("LILSMOKE_HIDAPI_POLL", SDL_FALSE)) {
++        const Uint32 SDL_HIDAPI_DETECT_INTERVAL_MS = SDL_GetHintBoolean("LILSMOKE_HIDAPI_POLL", SDL_FALSE) ? 250 : 3000;
+         Uint32 now = SDL_GetTicks();
+         if (!SDL_HIDAPI_discovery.m_unLastDetect || SDL_TICKS_PASSED(now, SDL_HIDAPI_discovery.m_unLastDetect + SDL_HIDAPI_DETECT_INTERVAL_MS)) {
+             ++SDL_HIDAPI_discovery.m_unDeviceChangeCounter;

@@ -1,0 +1,9 @@
+{
+  "id": "org.lilsmoke.pcsx4all",
+  "name": "PCSX4ALL-LilSmoke",
+  "version": "0.0.1",
+  "open_core": "psx",
+  "architecture": "mipsel-linux-musl",
+  "description": "Native PlayStation emulator with ten save-state slots",
+  "license": "GPL-3.0-or-later larger work; MPL-2.0 eligible authored files; see runtime/licenses"
+}

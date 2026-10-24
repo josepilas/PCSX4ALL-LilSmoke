@@ -1,0 +1,812 @@
+[
+  {
+    "path": "pcsx4all/src/cdriso.cpp",
+    "sha256": "907bdea59c9b08f86497583c857de6d09b25abe12fb69b3f0c0d3758fdedc76a",
+    "origin": "qualified-core-src/src/cdriso.cpp"
+  },
+  {
+    "path": "pcsx4all/src/cdriso.h",
+    "sha256": "41a6d24a8c13542db6534e85fe7fbfff7344951ed1e851505bd7e3e9ab3afabe",
+    "origin": "qualified-core-src/src/cdriso.h"
+  },
+  {
+    "path": "pcsx4all/src/cdrom.cpp",
+    "sha256": "479bfaf3c0381f04711d59009a3854fd2827f20a6a732338b613991c49de329c",
+    "origin": "qualified-core-src/src/cdrom.cpp"
+  },
+  {
+    "path": "pcsx4all/src/cdrom.h",
+    "sha256": "12ac1f059c70ba2bf019834cde87d9748778a04d64618ab0bb75db0eb28aa235",
+    "origin": "qualified-core-src/src/cdrom.h"
+  },
+  {
+    "path": "pcsx4all/src/decode_xa.cpp",
+    "sha256": "43bb446119458c2ed785c2c564dea5d31662e956420b9cc739ccc1eb4f976f68",
+    "origin": "qualified-core-src/src/decode_xa.cpp"
+  },
+  {
+    "path": "pcsx4all/src/decode_xa.h",
+    "sha256": "5ea285e80132d62a0a75ad1ecfe2dccb936ce4752455691db62241db5dbcfe32",
+    "origin": "qualified-core-src/src/decode_xa.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu.cpp",
+    "sha256": "e21bdffb1caf2415b4647cfdd4682689ec57c8fa7cb3ba0d3176d31bdcc74683",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu.h",
+    "sha256": "3f8b74f8b6cb93b5d991deee4ad5f58fc14d16a656dd21813b37ec523c8c147f",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu_blit.h",
+    "sha256": "3f5fa0d6abf7e35c370f1db6093d7a3766e9678b4eb982c7d8699fc0dbff2af9",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu_blit.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu_fps.h",
+    "sha256": "d83b3b180d4b90a2dd2f4fd8ff67954dd3a8ef7f6ec1d45a40191aa7cc7dfc05",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu_fps.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu_prim.h",
+    "sha256": "d7993dbcf3dc149dacd70bc1eb60716201d6d5505f2f0a4320291586af60d73a",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu_prim.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_dfxvideo/gpu_soft.h",
+    "sha256": "816465b4ffcf02ac2ff871061918fc4257dbea6a0e5d733e2555e6c0bf0b5ab2",
+    "origin": "qualified-core-src/src/gpu/gpu_dfxvideo/gpu_soft.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_drhell/gpu.cpp",
+    "sha256": "7fd66fe2353cf1705124f120db7cd2c595b9402dd3555666c4bc804c185d3b43",
+    "origin": "qualified-core-src/src/gpu/gpu_drhell/gpu.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_drhell/gpu_blit.h",
+    "sha256": "73680c287125a8f7f325aef06757ff1a2020207ad297b3a147c663a44a26e84f",
+    "origin": "qualified-core-src/src/gpu/gpu_drhell/gpu_blit.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_drhell/gpu_draw.h",
+    "sha256": "ca369b39d50ca6f295bbb423c2ffbfd0ac7ae16832016f0afef3878eeb6c12a7",
+    "origin": "qualified-core-src/src/gpu/gpu_drhell/gpu_draw.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_drhell/gpu_prim.h",
+    "sha256": "12879b106085bee9bb9ee1bf7881b1b43ca9e2a95261cdd2de500af1706c1116",
+    "origin": "qualified-core-src/src/gpu/gpu_drhell/gpu_prim.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_null/gpu.cpp",
+    "sha256": "15a8d353ed281221f96209d56d0e410bfb3164cd993a714160a2ac2edd7db834",
+    "origin": "qualified-core-src/src/gpu/gpu_null/gpu.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu.cpp",
+    "sha256": "88f24d8d1235ac20295cdcb95e296019231ae4d8514774ee8baa0ea7ee51ed48",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu.h",
+    "sha256": "8efb3dae3c9100bb9bb6f17ad79d16ccbfe26fb9d679cfb76711a678942c7a11",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_arm.h",
+    "sha256": "c297b63475d88706817db41cd28a651f6b7afe514e18752f06eef71401c8c0be",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_arm.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_arm.s",
+    "sha256": "0e7baeda0a6baef3079e17fbfd2b01fe47ec25245baec33cff25d5f2fe91639f",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_arm.s"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_blit.h",
+    "sha256": "9d5011218eeeaeb1e87ba1c901aef6eb40fbc190e8da841b934096e4bba3092a",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_blit.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_command.h",
+    "sha256": "aeb7251ccb7431f881e7bb37d75cf1c216e26be72955de73b61f8bc9f9b0aaec",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_command.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_fixedpoint.h",
+    "sha256": "7bb3933ee0bdf586ef2fc3caece24804d179bbc2509f949d0627eff24dd0df1a",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_fixedpoint.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner.h",
+    "sha256": "80be5a2a6d74e8958c6c6a592219109d15be84fc4aac6ed9e8b669da56388ecc",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner_blend.h",
+    "sha256": "4f9abd37603d5224f672df29f045b8d82d9e2f72aafb932d74affbb4eb444bfa",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner_blend.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner_blend_arm5.h",
+    "sha256": "4b600d51b1bc3564df559a64898f8e0c0e25ccf532f2fe17b88e2cabcec98169",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner_blend_arm5.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner_blend_arm7.h",
+    "sha256": "f77f878df16d033ee75d66a0c558b3d86fc0153892056a8fdb28d757c2c36fce",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner_blend_arm7.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner_light.h",
+    "sha256": "01ad5f20bbdb57e129e7439b83d435cee59d9b070b50c8fd4747864cc8fed4d2",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner_light.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_inner_quantization.h",
+    "sha256": "ac5d3c9d9312800ced9fd1392d97627f98ad54bcdc30538a141497ac05505ece",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_inner_quantization.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_raster_image.h",
+    "sha256": "bde7b58d80adb1b686f36efc858694c1a4bcf0b7f494222053e7b353b89f5cf4",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_raster_image.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_raster_line.h",
+    "sha256": "d79973d0fffde7d38ddb4c141bbb637722c8c0c28a3260270f6bdc6cadd88760",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_raster_line.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_raster_polygon.h",
+    "sha256": "7192d4e7119f5e99311a60ca608297ac2968a02412e15ea811d44420d0401f9a",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_raster_polygon.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_raster_sprite.h",
+    "sha256": "a9ddff008fb4315413148f7ce964f3375f77e5ae485248890dfc8c8b5469c9ff",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_raster_sprite.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpu_unai.h",
+    "sha256": "634b53ba1a797dadb51d7c9c652bd6f64910210469b8d6f0cc236c4c6c20f725",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpu_unai.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpu_unai/gpulib_if.cpp",
+    "sha256": "cad4c08fa54fecaed87ff0d645e1b98346ca7032fb087253d0f9fe5b6316c589",
+    "origin": "qualified-core-src/src/gpu/gpu_unai/gpulib_if.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpulib/gpu.cpp",
+    "sha256": "4a433411cfaaecfd4bfeb09a8cfc093e210dc51518d102ee38267a3e60b128e0",
+    "origin": "qualified-core-src/src/gpu/gpulib/gpu.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpulib/gpu.h",
+    "sha256": "c5f7a5089a75a92235bd1ec4a2aa0bfe7ee949b428a851f9e771c9402d6458e0",
+    "origin": "qualified-core-src/src/gpu/gpulib/gpu.h"
+  },
+  {
+    "path": "pcsx4all/src/gpu/gpulib/vout_port.cpp",
+    "sha256": "8ec5a688f9d0b91d34fdc46c1ced38615001656891a8741949ae51897d529275",
+    "origin": "qualified-core-src/src/gpu/gpulib/vout_port.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gpu.h",
+    "sha256": "e453ef5e8e700bc1415ecafdeb4f7342c6c8da8a0b43dfbde1490500868e21aa",
+    "origin": "qualified-core-src/src/gpu.h"
+  },
+  {
+    "path": "pcsx4all/src/gte.cpp",
+    "sha256": "4f5ea262950553ed529e55d4fbf82fb58326d7934ee7a28c6e60a105a9bbbe0d",
+    "origin": "qualified-core-src/src/gte.cpp"
+  },
+  {
+    "path": "pcsx4all/src/gte.h",
+    "sha256": "878d78510e000eb48ac57f8ce4fd17aa0e22d11a62dfeb26c731b0d25318b436",
+    "origin": "qualified-core-src/src/gte.h"
+  },
+  {
+    "path": "pcsx4all/src/gte_divide.h",
+    "sha256": "2a6d79c09a8401433c93d599adf59ee8aa1193ba59fb1a089f08b2437cd7c4b5",
+    "origin": "qualified-core-src/src/gte_divide.h"
+  },
+  {
+    "path": "pcsx4all/src/mdec.cpp",
+    "sha256": "d872bf86c48571e526221d6eeb861fda7abf7210f889083ce7f4b91fe97dc987",
+    "origin": "qualified-core-src/src/mdec.cpp"
+  },
+  {
+    "path": "pcsx4all/src/mdec.h",
+    "sha256": "2e758bfea00b2cc0280f79889b6d9f336966e5ca6b8596b51bd6dfd06c31a0d5",
+    "origin": "qualified-core-src/src/mdec.h"
+  },
+  {
+    "path": "pcsx4all/src/misc.cpp",
+    "sha256": "e4c7627c0fdb4fc952b0ef0a9713666ae3ce456e72e04106f748f47fb236224b",
+    "origin": "qualified-core-src/src/misc.cpp"
+  },
+  {
+    "path": "pcsx4all/src/misc.h",
+    "sha256": "56a406580a46af5172e519b992875e4573649904a2210b6533c254cee96907a5",
+    "origin": "qualified-core-src/src/misc.h"
+  },
+  {
+    "path": "pcsx4all/src/pad.cpp",
+    "sha256": "e086b448c317ccf669d4da86337a8d72079b0f88f4446d6fa58355d6574df8bb",
+    "origin": "qualified-core-src/src/pad.cpp"
+  },
+  {
+    "path": "pcsx4all/src/plugin_lib/perfmon.cpp",
+    "sha256": "94ba344ee26c13f37101ab9d0977bb7c8a819014fba4a71d548e1cf32ca107b9",
+    "origin": "qualified-core-src/src/plugin_lib/perfmon.cpp"
+  },
+  {
+    "path": "pcsx4all/src/plugin_lib/perfmon.h",
+    "sha256": "97f3b393c7ae567b19645689d9dd5c48bf693dc5ce023330e5dc358165168942",
+    "origin": "qualified-core-src/src/plugin_lib/perfmon.h"
+  },
+  {
+    "path": "pcsx4all/src/plugin_lib/pl_sshot.cpp",
+    "sha256": "449e312bcf858817acc31b6823a8f8446a71b93cc2620047919ac1aa03b19e7c",
+    "origin": "qualified-core-src/src/plugin_lib/pl_sshot.cpp"
+  },
+  {
+    "path": "pcsx4all/src/plugin_lib/plugin_lib.cpp",
+    "sha256": "633d50999ddea8658fdc38a51f55c2fea783fa8f2c8c0bea0a1051a87da9757a",
+    "origin": "qualified-core-src/src/plugin_lib/plugin_lib.cpp"
+  },
+  {
+    "path": "pcsx4all/src/plugin_lib/plugin_lib.h",
+    "sha256": "6f512f8c9242a09c9727efea971bb32bb13d1b813e83f6894595fa4a9ef95d05",
+    "origin": "qualified-core-src/src/plugin_lib/plugin_lib.h"
+  },
+  {
+    "path": "pcsx4all/src/plugins.cpp",
+    "sha256": "50fa534013bae9d072f9a944dfc0dd5864461668ccd9c9e788e88f246f813f4f",
+    "origin": "qualified-core-src/src/plugins.cpp"
+  },
+  {
+    "path": "pcsx4all/src/plugins.h",
+    "sha256": "1b5e86664b340c2ed84f0c1e115ef6f1e7e609c866bf0125e6cd2b566e358702",
+    "origin": "qualified-core-src/src/plugins.h"
+  },
+  {
+    "path": "pcsx4all/src/port/rkgame/compat/zlib.h",
+    "sha256": "a55d87076b660f630daf5acd5c64fedf82f115f70e439b549131f311453b312f",
+    "origin": "qualified-core-src/src/port/rkgame/compat/zlib.h"
+  },
+  {
+    "path": "pcsx4all/src/port/rkgame/port.cpp",
+    "sha256": "800471dc39e01572fddae1e06771013b31bf1d7da90b9e436ccb7496534dc115",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update"
+  },
+  {
+    "path": "pcsx4all/src/port/rkgame/port.h",
+    "sha256": "6689be856fd31abfbc501380f00bbbfe7aaa206f9bd87ebd3e6d1a49ba4bc4e1",
+    "origin": "qualified-core-src/src/port/rkgame/port.h"
+  },
+  {
+    "path": "pcsx4all/src/port/rkgame/rkgame_bridge.h",
+    "sha256": "723805cab0b2363eb758026e1cab42b8915bf06f167c3154d6ea7f7bb87118d9",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update"
+  },
+  {
+    "path": "pcsx4all/src/port/sdl/frontend.cpp",
+    "sha256": "8118c0640bf1c1d7035473af2c00fa2564d7628608ec65212c31dacf5962fe1c",
+    "origin": "qualified-core-src/src/port/sdl/frontend.cpp"
+  },
+  {
+    "path": "pcsx4all/src/port/sdl/port.cpp",
+    "sha256": "ae52e0a4eb2f9cf103d12382b587cad0af8512cd4dd5927ef7e7853d5de714b7",
+    "origin": "qualified-core-src/src/port/sdl/port.cpp"
+  },
+  {
+    "path": "pcsx4all/src/port/sdl/port.h",
+    "sha256": "5d07a08baacc06ebe83b5919d1b0aea6cebf68a43762c51cecd22e89705340d2",
+    "origin": "qualified-core-src/src/port/sdl/port.h"
+  },
+  {
+    "path": "pcsx4all/src/ppf.cpp",
+    "sha256": "21d6d4ccb00c8a1f7cd91a360fc27c4e3d95ae84c235aa0f1c401946590459f3",
+    "origin": "qualified-core-src/src/ppf.cpp"
+  },
+  {
+    "path": "pcsx4all/src/ppf.h",
+    "sha256": "aa1f6a08924f29aee8a2910389882c87a59e1532a9f1b72bb6737f2284c51d1f",
+    "origin": "qualified-core-src/src/ppf.h"
+  },
+  {
+    "path": "pcsx4all/src/psemu_plugin_defs.h",
+    "sha256": "d544c292143abc3a44c6d97677e17c59d032deb7c1fd7a2ac0bb2fce43936377",
+    "origin": "qualified-core-src/src/psemu_plugin_defs.h"
+  },
+  {
+    "path": "pcsx4all/src/psxbios.cpp",
+    "sha256": "9e2600779fb2c85f748abd2e0bc2b93186b51b553ca249c327c06e67890db1e9",
+    "origin": "qualified-core-src/src/psxbios.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxbios.h",
+    "sha256": "f94073525e87a6520fcdeb6045cc401b682738fa36098f987656ad3352ff07d4",
+    "origin": "qualified-core-src/src/psxbios.h"
+  },
+  {
+    "path": "pcsx4all/src/psxcommon.cpp",
+    "sha256": "2bb2be2fd7287e0ec5528c8453c3a4a04cf5aa04480586c095a962933bc8d52c",
+    "origin": "qualified-core-src/src/psxcommon.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxcommon.h",
+    "sha256": "92e48c68baf1e83659a5b37c215cd9eed5fbf9b9de3f480613940cba8dd1d415",
+    "origin": "qualified-core-src/src/psxcommon.h"
+  },
+  {
+    "path": "pcsx4all/src/psxcounters.cpp",
+    "sha256": "571969d54b5737ffd2a56b5cefa5cc7a066a40f205806402dff5c94f4e2dd70e",
+    "origin": "qualified-core-src/src/psxcounters.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxcounters.h",
+    "sha256": "62a7c9042164ab92979459f3fa1e71b3ad430f08145e15951638cfdf6b5361e8",
+    "origin": "qualified-core-src/src/psxcounters.h"
+  },
+  {
+    "path": "pcsx4all/src/psxdma.cpp",
+    "sha256": "3df3bdae9a9dfcea5e9bc93bca9b6186039739823d8874d088b2b495173ff780",
+    "origin": "qualified-core-src/src/psxdma.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxdma.h",
+    "sha256": "5da068795e6dd1194f1a066a78fafc97b73d5bfa0680f14f959974fee2da1b89",
+    "origin": "qualified-core-src/src/psxdma.h"
+  },
+  {
+    "path": "pcsx4all/src/psxevents.cpp",
+    "sha256": "ffeee7237e904a3a76e95b3e31d8d607f65eae03cdeacc1e1f02cede6e845ab5",
+    "origin": "qualified-core-src/src/psxevents.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxevents.h",
+    "sha256": "b1f3374270dcddc01341f56e86f7ac6dcbad0afb722af7efb4f3c6080f5b4b2f",
+    "origin": "qualified-core-src/src/psxevents.h"
+  },
+  {
+    "path": "pcsx4all/src/psxhle.cpp",
+    "sha256": "5190041a51fae34284492db8a48d1280049f3b85cc574e7e5b0ca779b9625cbc",
+    "origin": "qualified-core-src/src/psxhle.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxhle.h",
+    "sha256": "383c227ab8e236d27a6ab9117e9877a4f2323a984827515463a72238ba08a009",
+    "origin": "qualified-core-src/src/psxhle.h"
+  },
+  {
+    "path": "pcsx4all/src/psxhw.cpp",
+    "sha256": "5dc0748b1efd2259b9997d18bd3bd8186da2ef8b158a9370081ed656e682f5db",
+    "origin": "qualified-core-src/src/psxhw.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxhw.h",
+    "sha256": "4e07a52e05b4306a329cfb775487c8cda2f6c0377b207b8d5d31ecf10d15f38f",
+    "origin": "qualified-core-src/src/psxhw.h"
+  },
+  {
+    "path": "pcsx4all/src/psxinterpreter.cpp",
+    "sha256": "8f59ab8acf6dc661004b4544c5c682004798aa0748499557961bd800c6041689",
+    "origin": "qualified-core-src/src/psxinterpreter.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxmem.cpp",
+    "sha256": "3ee90e49abe7ae27df233eb61de37f14be6aa21012dbe3d24e7c4ed65b7668e5",
+    "origin": "qualified-core-src/src/psxmem.cpp"
+  },
+  {
+    "path": "pcsx4all/src/psxmem.h",
+    "sha256": "b5885fbbaeb5fd453f0693cee4697744b503d0f598876990aa896f9878ee1d51",
+    "origin": "qualified-core-src/src/psxmem.h"
+  },
+  {
+    "path": "pcsx4all/src/r3000a.cpp",
+    "sha256": "de48588532fede66492d2e385f189277b0fc4063637c880b8003b50cdc7cd460",
+    "origin": "qualified-core-src/src/r3000a.cpp"
+  },
+  {
+    "path": "pcsx4all/src/r3000a.h",
+    "sha256": "8a9d7cf887626ed08a0b60f3501ab19b5001bbdae6c4fac29937a54a7a46bc4d",
+    "origin": "qualified-core-src/src/r3000a.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/arm.h",
+    "sha256": "49c3aa3e445fbe43cc74b2c3136545f0b8937a3d15dfb39f4fc05c85f0b9ebc3",
+    "origin": "qualified-core-src/src/recompiler/arm/arm.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/disarm.h",
+    "sha256": "83a5a34184efd1105a1bc9cd2ca253433671d63073a8a393ac27ae138fbfd8f1",
+    "origin": "qualified-core-src/src/recompiler/arm/disarm.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/opcodes.h",
+    "sha256": "460ba0d206ca32777ce48b7af50979625973b9762bf287aa97350122fe097572",
+    "origin": "qualified-core-src/src/recompiler/arm/opcodes.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/rec_alu.h",
+    "sha256": "cc88ee94190958e83dddef1616cd252e2b9b28f193f727e7a6d08b8d067cfae2",
+    "origin": "qualified-core-src/src/recompiler/arm/rec_alu.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/rec_branch.h",
+    "sha256": "551ecebf545c53cf0fe50d1f34b064aba747a5b0f4c8b0edbe1e44773b6a3e5c",
+    "origin": "qualified-core-src/src/recompiler/arm/rec_branch.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/rec_gte.h",
+    "sha256": "80872708c735475b955a7a29fbdd4604f788a155883c9c01377a564cf09feb73",
+    "origin": "qualified-core-src/src/recompiler/arm/rec_gte.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/rec_mem.h",
+    "sha256": "8974d44d109b2a66bcd1246c6ee00d93d01792a801a20d2390507d4ec11352b4",
+    "origin": "qualified-core-src/src/recompiler/arm/rec_mem.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/rec_misc.h",
+    "sha256": "55898a5e95bd3959898d063152c20dc31d5395088810ab7b96451acf68ba43b0",
+    "origin": "qualified-core-src/src/recompiler/arm/rec_misc.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/recompiler.cpp",
+    "sha256": "5ad477b960a2dd4fae64f7e1f6585373d7702471d36fe6d7b3724c21efae4d34",
+    "origin": "qualified-core-src/src/recompiler/arm/recompiler.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/risc_armv4le.h",
+    "sha256": "d3a7d84011e58b82face1a0fe6039f199cdb79aa72a3bf982c8f0ad6e1f6c936",
+    "origin": "qualified-core-src/src/recompiler/arm/risc_armv4le.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm/run.s",
+    "sha256": "a4aa0ccca4367567829c0211ae0864ec8d3de4cae9ee5b40cb65b961bc8ce276",
+    "origin": "qualified-core-src/src/recompiler/arm/run.s"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/arm.h",
+    "sha256": "b16fa47c1c07c555c7cd5796e0519579dfcb6a4f9aa84fb7b7224bcdd0394275",
+    "origin": "qualified-core-src/src/recompiler/arm_old/arm.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/opcodes.h",
+    "sha256": "db139ee2ec5b86470c7deaed2afc7ab893db68092d8ff0f1366858b1e4fd0cf9",
+    "origin": "qualified-core-src/src/recompiler/arm_old/opcodes.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/rec_alu.h",
+    "sha256": "44f8563c38205f50c03af4fbee5fb1863b3798e7350a3206af4be10178ac87c9",
+    "origin": "qualified-core-src/src/recompiler/arm_old/rec_alu.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/rec_branch.h",
+    "sha256": "318c73f6b7e7c68dc6fae28eea59d78011bde395692386e0a8a910bd368f41a0",
+    "origin": "qualified-core-src/src/recompiler/arm_old/rec_branch.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/rec_gte.h",
+    "sha256": "c7b556871e69e2c440483c8b2728f3bca37ade26090572bf5a96acb9fe9f25bd",
+    "origin": "qualified-core-src/src/recompiler/arm_old/rec_gte.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/rec_mem.h",
+    "sha256": "f7a26a66ed365a3e10267d1c1c969b8fd79db0b7af91b790bee249c52fec97dc",
+    "origin": "qualified-core-src/src/recompiler/arm_old/rec_mem.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/rec_misc.h",
+    "sha256": "21f6aa0c8c8d344ef0afcbd1e3589b40573666cc4532784dd1a630334f59467f",
+    "origin": "qualified-core-src/src/recompiler/arm_old/rec_misc.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/recompiler.cpp",
+    "sha256": "eb0a9594ab900d8f6ebe90c393cc9292bf839aa9542d28eb0b61a511d6a3ca4f",
+    "origin": "qualified-core-src/src/recompiler/arm_old/recompiler.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/risc_armv4le.h",
+    "sha256": "aaa1cf9e9298416988b31ba3a2d8494f21a67d5318ab418c3e2fa77ee0451938",
+    "origin": "qualified-core-src/src/recompiler/arm_old/risc_armv4le.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/arm_old/run.s",
+    "sha256": "4e1f05b689a55d97266a937c255e4f3ea06ee8c4d80b20de0b714dbaf2b07aac",
+    "origin": "qualified-core-src/src/recompiler/arm_old/run.s"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/disasm.h",
+    "sha256": "fc8baecd067733234874c25e6019d20d2aba9ab4282847cca2071f82cee3d76b",
+    "origin": "qualified-core-src/src/recompiler/mips/disasm.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/host_asm.S",
+    "sha256": "d569d77f2662dceaf25098b983c9a9b4dbf647c3efbefc7b2f07e88065676a18",
+    "origin": "qualified-core-src/src/recompiler/mips/host_asm.S"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/host_asm.h",
+    "sha256": "547c157b66192a8a86cc126996b101c500ad13b7949dd74430b5ff4806183583",
+    "origin": "qualified-core-src/src/recompiler/mips/host_asm.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/mem_mapping.cpp",
+    "sha256": "1b5e04b16deb4bc9cef32492099d5c582daf30984cdda7cc56026ec11e48b30a",
+    "origin": "qualified-core-src/src/recompiler/mips/mem_mapping.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/mem_mapping.h",
+    "sha256": "980c8b610da237abd0c25573e2e32114a10084827560e6441fb9251ae0e6d16a",
+    "origin": "qualified-core-src/src/recompiler/mips/mem_mapping.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/mips_codegen.cpp",
+    "sha256": "f1f473b179aa4fb1a52508773000571e2de36277a2d851e879f8326d07596198",
+    "origin": "qualified-core-src/src/recompiler/mips/mips_codegen.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/mips_codegen.h",
+    "sha256": "83dce281cb629a28b50225de437250c7048a30eeb699c210d5683dae5c917eff",
+    "origin": "qualified-core-src/src/recompiler/mips/mips_codegen.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/mips_disasm.cpp",
+    "sha256": "ba3321ddd98200fa296892c32deb1f979e0e90835cf84248acb301d5819f2729",
+    "origin": "qualified-core-src/src/recompiler/mips/mips_disasm.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/opcodes.h",
+    "sha256": "30f0ec1a9869bd95f5d2d1a7254848a095447ba374289ccf323bc2f8724be25f",
+    "origin": "qualified-core-src/src/recompiler/mips/opcodes.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_alu.cpp.h",
+    "sha256": "4482db33cdcae92f904951dc13f1563b2fb7ff7725836b5005468a6b0d76f521",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_alu.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_bcu.cpp.h",
+    "sha256": "2a3a1b421d010c175a9cefc7c98602329e7d89e88b81f0b104eb7a2e2537a0ab",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_bcu.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_cp0.cpp.h",
+    "sha256": "72677c8657adb8ff8df4bd9f7ce3eab18c3ea8aabfc450a0a0db846557339066",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_cp0.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_gte.cpp.h",
+    "sha256": "b16100337f3f8f1dc425653d67fc667429c38039220be9fe793affac54c83649",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_gte.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_lsu.cpp.h",
+    "sha256": "6812412b45f66295d2eb5f64d02dd6f0a3083ee142cd2a2917ffb458bae3f74e",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_lsu.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_lsu_hw.cpp.h",
+    "sha256": "5e5345d1ffdc76b50bfd0c8148ce583581ef78b9f0bd2d88149b7d83c6040c8e",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_lsu_hw.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/rec_mdu.cpp.h",
+    "sha256": "382e4388c6662f1e8e3d1b9bbd71ac5814ec3e96e710c1364184bfd02c327e8c",
+    "origin": "qualified-core-src/src/recompiler/mips/rec_mdu.cpp.h"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/recompiler.cpp",
+    "sha256": "b2be283bc78db78b85feb6ef7b0855441b76518d5f6d16b9298465c8d724c670",
+    "origin": "qualified-core-src/src/recompiler/mips/recompiler.cpp"
+  },
+  {
+    "path": "pcsx4all/src/recompiler/mips/regcache.h",
+    "sha256": "d0fcaef3d1f090b7056ded4366f1fbc81865d64121e7692a5aae69967e28a654",
+    "origin": "qualified-core-src/src/recompiler/mips/regcache.h"
+  },
+  {
+    "path": "pcsx4all/src/sio.cpp",
+    "sha256": "232b51940361f82bd7abda28f64f2f8be8a6f0e2e7749cedb2ecbd24729eb6b0",
+    "origin": "qualified-core-src/src/sio.cpp"
+  },
+  {
+    "path": "pcsx4all/src/sio.h",
+    "sha256": "489c05c56d5fc364f60f956f0d110102125673b4eca259bee309401e75fc3105",
+    "origin": "qualified-core-src/src/sio.h"
+  },
+  {
+    "path": "pcsx4all/src/sjisfont.h",
+    "sha256": "807eb07e9863643b8789d6e11c20f4cadcd809b471da949ceadba49c39f9d85c",
+    "origin": "qualified-core-src/src/sjisfont.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/adsr.c",
+    "sha256": "2b94a744fd5a99b66b0250a09323597abae3512b1c30b61e5e873b79e52bdc87",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/adsr.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/adsr.h",
+    "sha256": "4da411be43c85f53f0401c3ff09deec86f68e423ab6ac0e29c8c6cc4b063eaa3",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/adsr.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/alsa.c",
+    "sha256": "1bf4fc1a309daf4b844ace5dcf773f0296490c79271df167030d4a67bd92396f",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/alsa.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/arm_utils.S",
+    "sha256": "82cbbd03d640b32c79b225a7d9ffded46cd417d0a6a890dd3319cba59df853b8",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/arm_utils.S"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/dma.c",
+    "sha256": "bd0a4434e2ddbeb8ea20e08218341a6625b98d2accd78fcead4f8649c03b156d",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/dma.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/dma.h",
+    "sha256": "666cd22157451b4446f06743c49ca8ce502302998298a763ecc024856067ab04",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/dma.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/externals.h",
+    "sha256": "41ecd6845bc6a2057345c2e9b90058d5b7df1ec1545c0ba7a700e7d198b64a5a",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/externals.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/freeze.c",
+    "sha256": "740354e90a75af23f361ae7789f179e798d90fd22524c5d9a3261967f692d30f",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/freeze.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/gauss_i.h",
+    "sha256": "beb84d9b6eac5bf3da2d85b496f99ab0c9a54e6ab92e485b7ca052f52b6838fd",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/gauss_i.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/nullsnd.c",
+    "sha256": "104ef12bdd621b646d8cbd5c8066ac00f437924e19ef5446ba8e6840d6376ce3",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/nullsnd.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/oss.c",
+    "sha256": "d42f8f630ffcb1fad31ed3f1beab79f6bf1fd355efec96d9fd39e28c2e6dc519",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/oss.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/out.c",
+    "sha256": "a4cf49e3c2f5ad31a3b741211888a61bd738f6fa7e60bf489dbadfc970206236",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/out.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/out.h",
+    "sha256": "fe8160413834d04df0dcfd1180e7f45e92cf8b754bf67eec60366e92be599e00",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/out.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/psemuxa.h",
+    "sha256": "5778c15b55531835adef21b38fb6e77506bbe0632f3afba2cfdcc65bab07e904",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/psemuxa.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/pulseaudio.c",
+    "sha256": "e9ab8eccb7844f1f3b113c3e8c7af9f71a1e0b2e05d2fbdab228650eb6ac9fdb",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/pulseaudio.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/registers.c",
+    "sha256": "44507bc3da318634ff321c38790d5cc9825651c69ec3d8aa4ea3f628441412d9",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/registers.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/registers.h",
+    "sha256": "cc73f2eb2cb6d90cda6335204f4f7e6bca97a8a894301d3865bf48c0d4fd9f81",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/registers.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/reverb.c",
+    "sha256": "7b5d5cbc4383890e501148eae7c3827ea7eb3e69e2eb4286b639668ac0c9360a",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/reverb.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/sdl.c",
+    "sha256": "70546dcb81c5433e18b52d790f6737b443f6e35d1400b42065b1ee7059cc59da",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/sdl.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/sdl2.c",
+    "sha256": "2b9518433c06879c218900b696093c103efd4d6c13bcf6b2914bccffd797cdd3",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/sdl2.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu.c",
+    "sha256": "19c83a9ea6a2464fa1a6d6d2cfd65af7d7e0a01f986d2e7cc58b9ea9f00dd24e",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu.h",
+    "sha256": "f53722dcd24d8641ff6f9ef2b0bd6bd6c0889ad38bee832232f5aadcd91d275b",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu_c64x.c",
+    "sha256": "407945452d554e86863125b3c0aa9d7c241e725e0294684f084ab754dee5d3d0",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu_c64x.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu_c64x.h",
+    "sha256": "d039c5b7e6946235066fccd9950c6445da691c8ed896e33b59ff12b85c2009c9",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu_c64x.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu_c64x_dspcode.c",
+    "sha256": "c22f2761026f4fdc5ff1be0b980a1d6cd1253de4bb4d03b851b149b6f09769e5",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu_c64x_dspcode.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/spu_config.h",
+    "sha256": "b366019260758fd36f9d2f6e2077db53a5ce9796ca868c20c7cabe6b43093cfd",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/spu_config.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/stdafx.h",
+    "sha256": "b96ff148ebb94d6c3859f5166180e0a7b2ce0f9d288756cf7938b36b0cdcf28c",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/stdafx.h"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/xa.c",
+    "sha256": "2f1de06ddf2abd61ebd2587c1a64efa389f7db79420d95e806d64a9728490e4e",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/xa.c"
+  },
+  {
+    "path": "pcsx4all/src/spu/spu_pcsxrearmed/xa.h",
+    "sha256": "7430caa33eb7dbe8ab0b57b0adc23555d562375632c4951e9a850f8c28dafcc4",
+    "origin": "qualified-core-src/src/spu/spu_pcsxrearmed/xa.h"
+  },
+  {
+    "path": "pcsx4all/pcsx4all-launch.cpp",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update",
+    "original_sha256": "656a0a94d114a5a6665a65f0ddf89d60ae60b843bf157ee9555f237569a2429e",
+    "change": "MPL-2.0 notice added to owner-authored standalone PCSX file only",
+    "sha256": "8b46f55bbdd56aaa45b1ad284684bf8e18d02df3ad7eb3f7c59d94a397e51523"
+  },
+  {
+    "path": "pcsx4all/native-menu.cpp",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update",
+    "original_sha256": "3073a0280e22af00f3fff36875c87d613c2eaebe3a51a74c92b3e13dd12c6fba",
+    "change": "MPL-2.0 notice added to owner-authored standalone PCSX file only",
+    "sha256": "865ede0fd473a76b361cffc2e1dba0550e2ac2e7f8cc0f947f34a17ac1da0d9d"
+  },
+  {
+    "path": "pcsx4all/native-menu.h",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update",
+    "original_sha256": "f8b93da96ae7b2ff35f280375b8e293d10744ce34d1290a3e25838595e166014",
+    "change": "MPL-2.0 notice added to owner-authored standalone PCSX file only",
+    "sha256": "7ab42bf8104b7fa535eec9672d7511fe59fb5933e20ba4bad2db8bc5e099eb1f"
+  },
+  {
+    "path": "pcsx4all/state-io.h",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update",
+    "original_sha256": "e48388e837491742bebf68c9a8a7e197e7e6efd1cf5d0240aea6831122013ac5",
+    "change": "MPL-2.0 notice added to owner-authored standalone PCSX file only",
+    "sha256": "6695d26cc99297ab5859f1db123012ee1d61ed98ee84b4474272772199480648"
+  },
+  {
+    "path": "pcsx4all/state-store.h",
+    "origin": "Public adaptation source; independently rewritten bridge or frontend update",
+    "original_sha256": "4905cf02077bc3916ee87ba33c3e8cfa912b6e073f5ee69ac3d773d326f256da",
+    "change": "MPL-2.0 notice added to owner-authored standalone PCSX file only",
+    "sha256": "ef2e414c9b361ff13affabc21731b4c8752926b759475f097f94afca62a9c2ba"
+  }
+]

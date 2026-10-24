@@ -1,0 +1,46 @@
+[
+  {
+    "package": "sdl2",
+    "version_directory": "sdl2-2.28.5",
+    "archive": "SDL2-2.28.5.tar.gz",
+    "sha256": "332cb37d0be20cb9541739c61f79bae5a477427d79ae85e352089afdaf6666e4",
+    "modified_files": [
+      "src/joystick/hidapi/SDL_hidapijoystick.c",
+      "src/hidapi/SDL_hidapi.c",
+      "src/render/software/SDL_render_sw.c",
+      "src/video/SDL_stretch.c",
+      "src/video/directfb/SDL_DirectFB_events.c",
+      "include/SDL_config.h"
+    ]
+  },
+  {
+    "package": "sdl2_ttf",
+    "version_directory": "sdl2_ttf-2.22.0",
+    "archive": "SDL2_ttf-2.22.0.tar.gz",
+    "sha256": "d48cbd1ce475b9e178206bf3b72d56b66d84d44f64ac05803328396234d67723",
+    "modified_files": []
+  },
+  {
+    "package": "freetype",
+    "version_directory": "freetype-2.13.2",
+    "archive": "freetype-2.13.2.tar.xz",
+    "sha256": "12991c4e55c506dd7f9b765933e62fd2be2e06d421505d7950a132e4f1bb484d",
+    "modified_files": []
+  },
+  {
+    "package": "libpng",
+    "version_directory": "libpng-1.6.43",
+    "archive": "libpng-1.6.43.tar.xz",
+    "sha256": "6a5ca0652392a2d7c9db2ae5b40210843c0bbc081cbd410825ab00cc59f14a6c",
+    "modified_files": []
+  },
+  {
+    "package": "libzlib",
+    "version_directory": "libzlib-1.3.1",
+    "archive": "zlib-1.3.1.tar.xz",
+    "sha256": "38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32",
+    "modified_files": [
+      "zconf.h"
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+PCSX4ALL-LilSmoke is a mixed-license work, not an MPL-only project.
+
+The PCSX emulator as a combined program is distributed under
+GNU GPL version 3 or later, with all original per-file notices retained.
+See LICENSES/GPL-3.0.txt and pcsx4all/gpl.txt. GPL-2.0-or-later upstream notices
+are not replaced. MIT and dual GPL/LGPL notices continue to govern those files.
+
+Copyright (c) 2026 Jose Pilas and contributors, for eligible original material.
+The standalone owner-authored files pcsx4all/pcsx4all-launch.cpp,
+pcsx4all/native-menu.cpp, pcsx4all/native-menu.h, pcsx4all/state-io.h,
+pcsx4all/state-store.h, app/PCSX4ALL.sh, app/meta.json, app/pcsx4all.cfg,
+tools/*.py, tests/*.cpp, eligible support/*.cpp and support/*.h (except the
+MIT-licensed gamepad-state.h), and original release documentation are MPL-2.0.
+See LICENSES/MPL-2.0.txt. This designation does not cover imported routines,
+third-party files or patches to GPL files. The independently rewritten
+src/port/rkgame/port.cpp integration retains GPL-2.0-or-later compatibility.
+
+An MPL-2.0 designation on eligible original files does not alter GPL obligations
+for the combined executable. MPL section 3.3 applies where its conditions are
+met; no Incompatible With Secondary Licenses notice is added.
+
+Existing upstream notices, copyright statements, and library licenses prevail.
+Review RELEASE_GATE.json and BUILD-EVIDENCE.json before redistribution.

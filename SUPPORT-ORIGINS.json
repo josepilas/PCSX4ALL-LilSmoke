@@ -1,0 +1,57 @@
+[
+  {
+    "file": "support/Input.cpp",
+    "origin": "package/lilsmoke-ui/src/src/Input.cpp",
+    "original_sha256": "a176beae6aabcf2978a7fcfd31d87e3351594804e5129393b086c2f69c6d4f0d",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/Input.h",
+    "origin": "package/lilsmoke-ui/src/src/Input.h",
+    "original_sha256": "65e0c0bc7c68cae1f509efe852b3ed28d429eb2db5cf272e77bf9e572961fff2",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/Keymap.cpp",
+    "origin": "package/lilsmoke-ui/src/src/Keymap.cpp",
+    "original_sha256": "52296be04b6996df071d691100b2d7a62bfac4a88570d77be266eac1e08eb177",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/Keymap.h",
+    "origin": "package/lilsmoke-ui/src/src/Keymap.h",
+    "original_sha256": "5a0c01b5e24383e73903a0ac7d594bb1540a4ed5d872b36f978a14c63bb58ca1",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/Log.cpp",
+    "origin": "package/lilsmoke-ui/src/src/Log.cpp",
+    "original_sha256": "abf04efff4a8da83a25d02e92d6856009a9a30e6d480f2e012b5e8b75a0af8b1",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/Log.h",
+    "origin": "package/lilsmoke-ui/src/src/Log.h",
+    "original_sha256": "307c1b25eedf0a1d12908f98c115070e2691c9c56b3772db0c00dd5512b0e6d0",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/gamepad-state.h",
+    "origin": "package/lilsmoke-ui/src/src/gamepad-state.h",
+    "original_sha256": "e81658dab7241fb717a770e4c17fb399fc7fd127af9bd73cb49dc2bfef3df258",
+    "license": "MIT"
+  },
+  {
+    "file": "support/input-wire.h",
+    "origin": "package/lilsmoke-od-sdl/src/input-wire.h",
+    "original_sha256": "2913bfd769adcd654b2b8466e3c124b30c1474a7952f41fc1ac076adddd24909",
+    "license": "MPL-2.0"
+  },
+  {
+    "file": "support/EmulatorHelper.h",
+    "origin": "package/lilsmoke-scripts/src/EmulatorRegistry.h",
+    "extraction": "readEmulatorHelper only; no registry/system definitions",
+    "original_sha256": "667048458a569daca783757d059e038ee7ca133c39afc1c45e7560e1a2ff1ee7",
+    "license": "MPL-2.0"
+  }
+]
